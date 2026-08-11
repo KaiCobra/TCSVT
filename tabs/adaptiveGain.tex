@@ -1,0 +1,36 @@
+%% Source: docs/reports/m15_param_protocol/report.md, Stage 2 / Stage 4 tables.
+%% Dev set = the nine concrete editing categories (n = 560); the mixed category
+%% 0_random (n = 140) is excluded from all parameter selection and used only as
+%% an independent holdout (see tab:protocol_holdout).
+%% Offline evaluation: per-case tau is snapped to the nearest of the 14 h-arms and
+%% that arm's per-case scores are read off; used for RELATIVE ranking only.
+\begin{table}[t]
+\centering
+\caption{The CV-adaptive term shifts the frontier outward. At matched
+preservation, the adaptive threshold attains a higher edit score than any fixed
+threshold on the same frontier (the interpolation of the $\kappa_{\max}{=}0$
+arms). Dev set, $n{=}560$.}
+\label{tab:adaptive_gain}
+\small
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{l|cccc}
+\toprule
+Configuration & ImgReward$\uparrow$ & SSIM$\uparrow$ & LPIPS$\downarrow$ & PSNR$\uparrow$ \\
+\midrule
+\multicolumn{5}{l}{\textit{Fixed threshold ($\kappa_{\max}{=}0$)}}\\
+$h = 0.52$ & 0.782 & 0.843 & 0.1023 & 21.17 \\
+$h = 0.54$ & 0.724 & 0.853 & 0.0940 & 21.73 \\
+\midrule
+\multicolumn{5}{l}{\textit{Adaptive threshold}}\\
+$(c_{\max}, \kappa_{\max}) = (0.20, 0.60)$ (ours) & 0.734 & 0.856 & 0.0916 & 21.98 \\
+$(c_{\max}, \kappa_{\max}) = (0.15, 0.55)$ (LOCO consensus) & 0.715 & 0.859 & 0.0890 & 22.12 \\
+\midrule
+\multicolumn{5}{l}{\textit{Gain over the fixed-threshold frontier at matched preservation}}\\
+ours @ SSIM $0.856$ & \multicolumn{4}{l}{$0.734$ vs.\ $\approx 0.704$ interpolated \quad $(+0.030)$}\\
+ours @ LPIPS $0.0916$ & \multicolumn{4}{l}{$0.734$ vs.\ $\approx 0.702$ interpolated \quad $(+0.032)$}\\
+consensus @ SSIM $0.859$ & \multicolumn{4}{l}{$0.715$ vs.\ $\approx 0.677$ interpolated \quad $(+0.038)$}\\
+consensus @ LPIPS $0.0890$ & \multicolumn{4}{l}{$0.715$ vs.\ $\approx 0.677$ interpolated \quad $(+0.037)$}\\
+\bottomrule
+\end{tabular}%
+}
+\end{table}

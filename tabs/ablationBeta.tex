@@ -1,0 +1,55 @@
+%% Source: docs/reports/m14_no_beta_ablation/report.md (Tables 1-2).
+%% Recipe: minimal rewrite + cum0 + N2, seed 1, PIE-Bench 700 cases.
+%% "w/o Phase 2" = --skip_phase17 1 (the whole target-stream pass removed).
+\begin{table}[t]
+\centering
+\caption{Ablation of Phase~2, repeated at three working points. Removing
+Phase~2 improves \emph{every} preservation metric and degrades \emph{every} edit
+metric, but the two curves do not intersect: at matched preservation
+(w/o Phase~2 at $h{=}0.52$, PSNR $23.75$ vs.\ with Phase~2 at $h{=}0.60$,
+PSNR $23.66$) the full pipeline still leads by $+0.08$ ImgReward. Phase~2 does
+not move the working point along the frontier --- it moves the whole frontier.}
+\label{tab:ablation_phase2}
+\small
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{l c|cccc|cc}
+\toprule
+Config & $h$ & S.D.$\downarrow$ & PSNR$\uparrow$ & SSIM$\uparrow$ & LPIPS$\downarrow$ & HPSv2$\uparrow$ & ImgReward$\uparrow$ \\
+\midrule
+Full (ours)   & 0.52 & 0.0467 & 21.64 & 0.849 & 0.0978 & \textbf{0.2623} & \textbf{0.777} \\
+w/o Phase 2   & 0.52 & \textbf{0.0326} & \textbf{23.75} & \textbf{0.877} & \textbf{0.0731} & 0.2541 & 0.469 \\
+\midrule
+Full (ours)   & 0.54 & 0.0432 & 22.18 & 0.859 & 0.0903 & \textbf{0.2596} & \textbf{0.713} \\
+w/o Phase 2   & 0.54 & \textbf{0.0298} & \textbf{24.36} & \textbf{0.884} & \textbf{0.0671} & 0.2524 & 0.397 \\
+\midrule
+Full (ours)   & 0.60 & 0.0331 & 23.66 & 0.882 & 0.0709 & \textbf{0.2536} & \textbf{0.550} \\
+w/o Phase 2   & 0.60 & \textbf{0.0216} & \textbf{25.95} & \textbf{0.903} & \textbf{0.0521} & 0.2499 & 0.264 \\
+\bottomrule
+\end{tabular}%
+}
+
+\vspace{4pt}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{l c|cc|cc}
+\toprule
+Category & $n$ & IR full & IR w/o P2 & $\Delta$IR & $\Delta$PSNR \\
+\midrule
+change\_style      & 80 & 0.782 & 0.310 & $-0.472$ & $+7.60$ \\
+add\_object        & 80 & 0.584 & 0.120 & $-0.464$ & $+1.37$ \\
+change\_background & 80 & 0.832 & 0.399 & $-0.434$ & $+2.21$ \\
+random             & 140 & 0.757 & 0.453 & $-0.305$ & $+2.42$ \\
+attr.\ color       & 40 & 0.915 & 0.627 & $-0.288$ & $+2.61$ \\
+attr.\ pose        & 40 & 0.939 & 0.676 & $-0.263$ & $+3.33$ \\
+change\_object     & 80 & 0.694 & 0.438 & $-0.256$ & $+2.57$ \\
+attr.\ material    & 40 & 0.796 & 0.550 & $-0.246$ & $+2.60$ \\
+attr.\ content     & 40 & 0.872 & 0.640 & $-0.232$ & $+2.63$ \\
+\rowcolor{gray!12}
+delete\_object     & 80 & 0.819 & 0.801 & $\mathbf{-0.018}$ & $+0.19$ \\
+\bottomrule
+\end{tabular}%
+}
+
+\vspace{2pt}
+\centerline{\footnotesize (b) Per-category breakdown at $h{=}0.52$.
+Noise scale for $n{=}80$: $|\Delta \mathrm{IR}| \lesssim 0.11$.}
+\end{table}

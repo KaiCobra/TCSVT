@@ -1,0 +1,136 @@
+%% ===========================================================================
+%%  Understanding Before Editing — IEEE TCSVT (IEEEtran journal) version
+%%  Converted from the ACM MM submission (../ACM-MM_edited).
+%%
+%%  Build:  pdflatex main -> bibtex main -> pdflatex main -> pdflatex main
+%%          (or: latexmk -pdf main.tex)
+%%
+%%  Submission note: TCSVT initial submissions are usually sent as a
+%%  DOUBLE-SPACED single-column manuscript.  Use
+%%      \documentclass[journal,onecolumn,draftclsnofoot,11pt]{IEEEtran}
+%%  for the review copy, and the [journal] line below for the final/preprint
+%%  two-column look.  Both compile from these same source files.
+%% ===========================================================================
+
+\documentclass[journal]{IEEEtran}
+% \documentclass[journal,onecolumn,draftclsnofoot,11pt]{IEEEtran}  % review copy
+
+\usepackage{cite}                 % IEEE-style compressed numeric citations
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{booktabs}
+\usepackage[table]{xcolor}
+\usepackage{colortbl}
+\usepackage{multirow}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{subcaption}
+\usepackage{pgf}
+\usepackage[normalem]{ulem}       % normalem: keep \emph italic, only \uline underlines
+\usepackage{microtype}
+\usepackage{url}
+\usepackage[hidelinks]{hyperref}
+
+% algorithm + IEEEtran: keep the caption above the body and avoid float warnings
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\renewcommand{\algorithmicensure}{\textbf{Output:}}
+
+% ---------------------------------------------------------------------------
+% Heat-map cell shading used in the main comparison table (carried over from
+% the ACM version; requires pgf + colortbl + [table]xcolor).
+% ---------------------------------------------------------------------------
+\newcommand{\MinShade}{0}
+\newcommand{\MaxShade}{85}
+
+% Higher is better
+\newcommand{\AutoCellUp}[4]{%
+  \begingroup
+  \pgfmathparse{round(max(\MinShade,min(\MaxShade,\MinShade + (\MaxShade-\MinShade)*(((#1-#2)/(#3-#2))^2))))}%
+  \edef\ShadeValue{\pgfmathresult}%
+  \edef\ColorSpec{cyan!\ShadeValue}%
+  \pgfmathparse{(#1==#3 ? 1 : 0)}%
+  \ifnum\pgfmathresult=1
+    \expandafter\cellcolor\expandafter{\ColorSpec}\textbf{#1}%
+  \else
+    \ifnum#4=1
+      \expandafter\cellcolor\expandafter{\ColorSpec}\uline{#1}%
+    \else
+      \expandafter\cellcolor\expandafter{\ColorSpec}#1%
+    \fi
+  \fi
+  \endgroup
+}
+
+% Lower is better
+\newcommand{\AutoCellDown}[4]{%
+  \begingroup
+  \pgfmathparse{round(max(\MinShade,min(\MaxShade,\MinShade + (\MaxShade-\MinShade)*(((#3-#1)/(#3-#2))^2))))}%
+  \edef\ShadeValue{\pgfmathresult}%
+  \edef\ColorSpec{cyan!\ShadeValue}%
+  \pgfmathparse{(#1==#2 ? 1 : 0)}%
+  \ifnum\pgfmathresult=1
+    \expandafter\cellcolor\expandafter{\ColorSpec}\textbf{#1}%
+  \else
+    \ifnum#4=1
+      \expandafter\cellcolor\expandafter{\ColorSpec}\uline{#1}%
+    \else
+      \expandafter\cellcolor\expandafter{\ColorSpec}#1%
+    \fi
+  \fi
+  \endgroup
+}
+
+% ---------------------------------------------------------------------------
+\begin{document}
+
+\title{Understanding Before Editing: Training-Free Text-Guided Image Editing
+       via VAR Cross-Modal Attention}
+
+\input{tex/0_authors}
+
+% Running heads.  Replace the volume/number/date once the paper is accepted.
+\markboth{IEEE Transactions on Circuits and Systems for Video Technology,~Vol.~XX, No.~XX, XXXX~20XX}%
+{Author \MakeLowercase{\textit{et al.}}: Understanding Before Editing: Training-Free Text-Guided Image Editing via VAR Cross-Modal Attention}
+
+\maketitle
+
+\input{tex/1_abstract}
+
+\IEEEpeerreviewmaketitle
+
+% --- Teaser (was \begin{teaserfigure} in acmart; IEEE has no equivalent, so it
+% --- becomes an ordinary full-width float).
+\begin{figure*}[!t]
+  \centering
+  \includegraphics[width=\textwidth]{teaser/imageEditing.png}
+  \caption{Diverse editing results of our training-free, inversion-free framework on a 2B-parameter VAR model. Each pair shows source and edited images side by side or top and bottom, spanning object replacement, addition and attribute modification. Our method constructs attention-driven spatial masks and performs discrete token-level composition, achieving precise edits with faithful background preservation.}
+  \label{fig:teaser}
+\end{figure*}
+
+\input{tex/2_introduction}   % I.    Introduction
+\input{tex/3_relatedWorks}  % II.   Related Work
+\input{tex/4_preliminaries} % III.  Preliminaries
+\input{tex/5_method}        % IV.   Methodology
+\input{tex/6_analysis}      % V.    What controls the preservation-edit trade-off
+\input{tex/7_experiments}   % VI.   Experiments
+\input{tex/8_discussion}    % VII.  Discussion and Limitations
+\input{tex/9_conclusion}    % VIII. Conclusion
+
+% ---------------------------------------------------------------------------
+\bibliographystyle{IEEEtran}
+\bibliography{main}
+
+% ---------------------------------------------------------------------------
+% Appendix.  TCSVT allows appendices in the main body; several sections that
+% were supplementary-only in the ACM version now belong here.
+\appendices
+\input{tex/A_appendix}
+
+% ---------------------------------------------------------------------------
+% Author biographies (TCSVT requires them for the final version).
+% \begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{photo}}]{Author Name}
+% Biography text here.
+% \end{IEEEbiography}
+
+\end{document}

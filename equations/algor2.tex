@@ -1,0 +1,47 @@
+\begin{algorithm}[t]
+\caption{Three-Phase Attention-Masked Editing}
+\label{alg:editing}
+\small
+\begin{algorithmic}[1]
+\Require Source image $I_{\mathrm{src}}$, prompts $P_s, P_t$, focus word sets $\mathcal{F}_s, \mathcal{F}_t$,
+         anchoring scales $N$, total scales $S$
+\Ensure Edited image $I_{\mathrm{edit}}$
+
+\State $\{r_k^s\}_{k=1}^{S} \gets \mathcal{Q}_{\mathrm{BSQ}}\!\bigl(\mathcal{E}(I_{\mathrm{src}})\bigr)$
+       \Comment{discrete channel}
+\State $F_s \gets \mathcal{E}(I_{\mathrm{src}})$ \Comment{continuous channel, Phase~1 only}
+
+\For{$k = 1$ \textbf{to} $S$}
+
+    \Statex \textit{\quad Phase 1: source reconstruction and mask extraction}
+    \State Generate tokens at scale $k$ under $P_s$ with $F_s$ injected
+    \If{$k \ge N$}
+        \State Compute $a_{k,b}$ for $\mathcal{F}_s$; IQR-filter $\to \hat{a}_k^{(s)}$
+        \State $M_{k,s}^{\mathrm{f}},\, M_{k,s}^{\mathrm{p}} \gets
+               \textsc{AdaptiveBinarize}(\hat{a}_k^{(s)})$ \Comment{Alg.~\ref{alg:adaptive_threshold}}
+    \EndIf
+
+    \Statex \textit{\quad Phase 2: target focus mask}
+    \State Generate tokens at scale $k$ under $P_t$, anchoring
+           $M_{k,s}^{\mathrm{p}}{=}1$ to $r_k^s$
+    \If{$k \ge N$}
+        \State Compute $a_{k,b}$ for $\mathcal{F}_t$; IQR-filter $\to \hat{a}_k^{(t)}$
+        \State $M_{k,t}^{\mathrm{f}},\, \_ \gets
+               \textsc{AdaptiveBinarize}(\hat{a}_k^{(t)})$
+    \EndIf
+    \State \textbf{discard} the tokens generated in Phase~2
+
+    \Statex \textit{\quad Phase 3: composition}
+    \State $M_k^{\mathrm{rep}} \gets \neg\!\bigl(M_{k,s}^{\mathrm{f}} \cup M_{k,t}^{\mathrm{f}}\bigr)$
+    \State Generate $g_k$ at scale $k$ under $P_t$
+    \If{$k < N$}
+        \State $r_k \gets r_k^s$ \Comment{explicit coarse anchoring}
+    \Else
+        \State $r_k \gets M_k^{\mathrm{rep}} \odot r_k^s + (1{-}M_k^{\mathrm{rep}}) \odot g_k$
+    \EndIf
+
+\EndFor
+
+\State \Return $\mathcal{D}_{\mathrm{VAE}}\!\bigl(\textstyle\sum_{k} \mathrm{up}(\mathrm{dec}(r_k))\bigr)$
+\end{algorithmic}
+\end{algorithm}

@@ -1,0 +1,111 @@
+%% ===========================================================================
+%%  APPENDICES.  Loaded after \appendices in main.tex.
+%%
+%%  Content that used to live here and has been PROMOTED to the main body:
+%%    - Adaptive mask thresholding + Algorithm 1  -> Sec. IV-C
+%%    - Complete editing pipeline, Algorithm 2    -> Sec. IV-D
+%%    - Scale-level replacement analysis (Fig.)   -> Sec. VI-C
+%% ===========================================================================
+
+\section{Implementation Details}
+\label{app:impl}
+
+This appendix records the details needed to reproduce the pipeline exactly.
+
+\noindent\textbf{Three generation passes, one set of weights.}
+A single edit invokes the VAR transformer three times with identical weights and
+seed. The passes differ only in four switches: whether continuous source features
+are injected, which token storage is attached, whether the storage masks are
+applied, and whether generated tokens are saved. Phase~1 injects the continuous
+features at every scale with weight $0$, which replaces the accumulated residual
+by the source features and makes the pass a reconstruction of $I_s$; Phase~2
+attaches a storage holding the source bitwise tokens together with the preserve
+mask, so background positions are pinned while the rest generates freely;
+Phase~3 attaches the same tokens with the replacement mask.
+
+\noindent\textbf{Which tokens are written back.}
+The tokens substituted in Phase~3 are always the BSQ quantization of the source
+image, obtained once before generation begins. The tokens produced by Phase~1 are
+overwritten before Phase~3, and the tokens produced by Phase~2 are discarded.
+Phase~2 therefore influences the output through exactly one channel, the target
+focus mask --- which is the reason the preserve level $\ell$ is inert
+(Sec.~\ref{sec:beta}) and the reason removing Phase~2 altogether has a large
+effect.
+
+\noindent\textbf{Mask polarity and granularity.}
+Storage masks are \emph{replacement} masks, not protection masks: a true entry
+means the position is copied from the source. Substitution operates on the
+bitwise index $r_k \in \{0,1\}^{h_k \times w_k \times d}$ with $d{=}32$, so
+composition is exact at the bit level and boundaries between replaced and
+generated regions are resolved per bit.
+
+\noindent\textbf{Attention extraction.}
+Cross-attention is recorded by patching the forward pass of blocks $2$--$31$ and
+recomputing $\mathrm{softmax}(qk^{\top}/\sqrt{d_h})$ from the module's own
+weights, leaving the original output path untouched. Because VAR evaluates each
+block exactly once per scale, the invocation counter of each block gives the
+scale index directly. For a focus word spanning several text tokens, the
+per-token maps are averaged; head dimensions are averaged before block-level
+aggregation.
+
+% TODO(optional): a data-flow figure of the three phases (mermaid source in
+% docs/reports/p2p_three_phase_pipeline/report.md §0) would make this appendix
+% considerably easier to follow.
+
+\section{Evaluation Protocol}
+\label{app:eval}
+
+\noindent\textbf{Metrics.}
+Structure Distance, and PSNR / SSIM / LPIPS / MSE restricted to the unedited
+region, follow the official PIE-Bench implementation. CLIP whole and CLIP edited
+use the standard CLIP score on the full image and on the annotated edited region
+respectively. We additionally report HPSv2 (version 2.1) and ImageReward.
+
+\noindent\textbf{Prompt convention.}
+All preference and CLIP scores are computed against the \emph{original}
+PIE-Bench editing prompt, with bracket annotations removed, regardless of which
+prompt was used for generation. This matters: scoring a generation against a
+paraphrased prompt instead of the original changes ImageReward by up to $0.33$
+and HPSv2 by $0.025$ on this benchmark, which is larger than most of the effects
+studied in Sec.~\ref{sec:analysis}. Any comparison that mixes the two conventions
+is meaningless.
+
+\noindent\textbf{Resolution handling.}
+Edited images are resized to the source resolution with Lanczos resampling before
+any metric is computed.
+
+\noindent\textbf{Run-to-run noise.}
+Generation uses bf16 kernels with fused attention and is not bit-exact. Repeating
+a full-benchmark run under an identical configuration and seed changes the mean
+by $\approx\!\pm 0.02$ ImageReward and $\approx\!\pm 0.001$ HPSv2 at $n{=}700$,
+and by $\approx\!\pm 0.05$ ImageReward for an individual $n{=}80$ category. We
+state this scale wherever a reported difference approaches it.
+
+\section{Text-to-Image Editing Mode}
+\label{app:t2i}
+
+% TODO: move the T2I qualitative results here from the ACM supplementary
+% material, and describe the mask-mechanism validation performed in this mode.
+
+\section{Focus-Word Extraction: Failure Modes}
+\label{app:prompt}
+
+% TODO: write from docs/reports/m14_minimal_rewrite_pipeline (experiments 4-5)
+% and docs/reports/prompt_length_comparison_m15.  Points to cover:
+%   - 230/700 source prompts yield an empty focus set; concentrated in
+%     add_object (75/80) and change_style (76/80).
+%   - A conditional minimal patch (insert an anchor into the source prompt only,
+%     leave the target prompt untouched) recovers +0.19 to +0.41 ImageReward on
+%     the patched categories at no preservation cost.
+%   - Rewriting whole prompts is strictly harmful and monotone in length
+%     (IR 0.653 -> 0.372 -> 0.206 for original / short rewrite / long rewrite),
+%     because generation follows the rewritten prompt while scoring uses the
+%     original one.  This is the prompt-convention effect quantified in
+%     Appendix~\ref{app:eval}, not a property of the editing method.
+%   - Keep the main tables free of the rewriting module.
+
+\section{Additional Qualitative Results}
+\label{app:qualitative}
+
+% TODO: 2-3 examples per editing category.  A journal appendix has the space and
+% this is the cheapest way to answer "evaluation scope is narrow".

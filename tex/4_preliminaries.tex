@@ -1,0 +1,51 @@
+\section{Preliminaries}
+\label{sec:preliminaries}
+
+\noindent\textbf{Visual Autoregressive Modeling.}
+Visual AutoRegressive modeling (VAR)~\cite{VAR} redefines image generation as a
+coarse-to-fine process: rather than predicting tokens one by one in raster-scan
+order, VAR first generates a rough low-resolution representation of the image and
+progressively refines it at finer scales. Formally, VAR consists of a multi-scale tokenizer and
+an autoregressive transformer. The tokenizer encodes an image $I$ into a hierarchy
+of $K$ discrete token maps $\{R_1, R_2, \ldots, R_K\}$ at progressively finer
+resolutions, where $R_k \in \mathbb{Z}^{h_k \times w_k}$ and
+$h_1 < h_2 < \cdots < h_K$. The transformer then autoregressively predicts the
+token map at each subsequent scale conditioned on all coarser scales and text
+embeddings $\Psi(t)$:
+\begin{equation}
+    p(R_1, \ldots, R_K) = \prod_{k=1}^{K} p\!\left(R_k \mid R_1, \ldots,
+    R_{k-1},\, \Psi(t)\right)
+\end{equation}
+All tokens within a scale are predicted in parallel, and each token in $R_k$
+corresponds to a spatially well-defined patch at resolution $(h_k, w_k)$. This
+spatial locality is the structural property that makes token-level selective
+editing geometrically meaningful in our framework.
+
+\noindent\textbf{Infinity and Bitwise Tokenization.}
+Infinity~\cite{Infinity} extends VAR by replacing the conventional index-wise
+tokenizer with Binary Spherical Quantization (BSQ)~\cite{BSQVAE}, which projects
+each continuous residual vector $z_k \in \mathbb{R}^d$ onto the unit hypersphere
+and binarizes each dimension:
+\begin{equation}
+    q_k = \frac{1}{\sqrt{d}}\,\operatorname{sign}\!\left(\frac{z_k}{\|z_k\|}
+    \right)
+\end{equation}
+This formulation scales the vocabulary to effectively infinite size while keeping
+computational cost linear in $d$. We adopt Infinity-2B as the backbone of our
+framework. Critically for our method, BSQ encoding is \textit{self-consistent}: encoding
+a real image into its bitwise token representation and decoding it back introduces
+no additional distortion beyond the tokenizer's inherent reconstruction error, meaning that transplanting source tokens into unedited regions
+guarantees pixel-faithful background preservation by construction.
+
+\noindent\textbf{Two source-information channels.}
+Throughout this paper we distinguish two ways in which the source image enters the
+generation process, because they behave very differently. The \textit{continuous}
+channel injects the VAE encoder output $\mathcal{E}(I_s)$ (before quantization)
+into the accumulated residual $\texttt{summed\_codes}$, and is used only to
+reproduce the source image faithfully while its cross-attention is recorded. The
+\textit{discrete} channel supplies the per-scale bitwise tokens
+$\{r_k^s\} = \mathcal{Q}_{\mathrm{BSQ}}(\mathcal{E}(I_s))$, and is the only channel
+that participates in token substitution. Every token written back into the output
+therefore comes from the BSQ quantization of the source image itself, never from an
+intermediate generation --- this is what makes background preservation exact rather
+than approximate.

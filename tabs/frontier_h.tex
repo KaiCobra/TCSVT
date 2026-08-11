@@ -1,0 +1,33 @@
+%% Source: docs/reports/m14_minimal_rewrite_pipeline/ (Table 6) +
+%%         docs/reports/m16_candidate_select/ (dense grid, new arms).
+%% Recipe: minimal rewrite + cum0 + N2, seed 1, PIE-Bench 700 cases,
+%%         kappa_max = 0 (adaptive term disabled, tau = h) so that h is isolated.
+%% NOTE: only arms with a complete six-metric record are listed; h = 0.64, 0.65,
+%%       0.68, 0.70 exist as runs but are omitted here for compactness.
+\begin{table}[t]
+\centering
+\caption{Sweeping the base level $h$ with the adaptive term disabled
+($\kappa_{\max}{=}0$, so $\tau_k \equiv h$), which isolates the effect of $h$.
+The preservation--edit trade-off is smooth and monotone over the whole range,
+with no discontinuity. Full PIE-Bench (700 cases).}
+\label{tab:frontier_h}
+\small
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{c|cccc|cc}
+\toprule
+$h$ & S.D.$\downarrow$ & PSNR$\uparrow$ & SSIM$\uparrow$ & LPIPS$\downarrow$ & HPSv2$\uparrow$ & ImgReward$\uparrow$ \\
+\midrule
+0.48 & 0.0538 & 20.67 & 0.829 & 0.1148 & 0.2683 & 0.888 \\
+0.50 & 0.0501 & 21.20 & 0.840 & 0.1054 & 0.2651 & 0.818 \\
+0.52 & 0.0467 & 21.64 & 0.849 & 0.0978 & 0.2623 & 0.777 \\
+0.54 & 0.0432 & 22.18 & 0.859 & 0.0903 & 0.2596 & 0.713 \\
+0.56 & 0.0395 & 22.70 & 0.867 & 0.0830 & 0.2569 & 0.645 \\
+0.58 & 0.0363 & 23.15 & 0.875 & 0.0771 & 0.2552 & 0.587 \\
+0.60 & 0.0331 & 23.66 & 0.882 & 0.0709 & 0.2536 & 0.550 \\
+0.62 & 0.0300 & 24.25 & 0.890 & 0.0645 & 0.2517 & 0.466 \\
+0.66 & 0.0243 & 25.33 & 0.902 & 0.0547 & 0.2494 & 0.336 \\
+0.75 & 0.0144 & 27.62 & 0.921 & 0.0391 & 0.2489 & 0.096 \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}

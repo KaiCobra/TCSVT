@@ -1,0 +1,27 @@
+# LaTeX build artifacts
+*.aux
+*.bbl
+*.blg
+*.bcf
+*.run.xml
+*.fdb_latexmk
+*.fls
+*.lof
+*.lot
+*.toc
+*.out
+*.log
+*.synctex.gz
+*.dvi
+*.xdv
+*.spl
+*.brf
+*.idx
+*.ilg
+*.ind
+
+# Editors / OS
+*.swp
+.DS_Store
+.vscode/
+.omc/

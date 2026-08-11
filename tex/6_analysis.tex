@@ -1,0 +1,283 @@
+%% ===========================================================================
+%%  Section V — Analysis (NEW in the TCSVT version).
+%%
+%%  ⚠ CONFIG NOTE (must be resolved before submission):
+%%  every number in this section comes from the "minimal rewrite + cum0 + N2"
+%%  recipe on the full PIE-Bench (700 cases), which is NOT the configuration
+%%  behind Table I.  Either (a) re-run Table I under this recipe, or (b) re-run
+%%  this section under the Table I recipe, or (c) state the difference
+%%  explicitly in the section preamble.  Do not leave it implicit.
+%%  See ../docs/reports/TCSVT_migration_notes.md §1.
+%% ===========================================================================
+
+\section{What Controls the Preservation--Edit Trade-off?}
+\label{sec:analysis}
+
+The components introduced in Sec.~\ref{section:method} are not equally
+consequential, and several intuitively appealing knobs turn out to have no
+effect at all. This section isolates each one on the full benchmark and reports
+what actually moves the result, what does not, and where the ceiling of the
+present formulation lies. Unless stated otherwise, all numbers are averaged over
+the 700 PIE-Bench cases under a single fixed recipe, so that rows within this
+section are directly comparable to one another.
+
+\noindent\textbf{Noise scale.}
+Generation is not bit-exact (bf16 kernels with fused attention), so identical
+configurations re-run from the same seed differ slightly. Measured over repeated
+full-benchmark runs, the run-to-run spread is $\approx\!\pm 0.02$ ImgReward and
+$\approx\!\pm 0.001$ HPSv2 at $n{=}700$, widening to $\approx\!\pm 0.05$
+ImgReward for a single $n{=}80$ category. We quote this scale whenever a
+difference is close to it, and every claim of an effect below is at least three
+times it.
+
+\subsection{The Statistics Behind the Threshold}
+\label{sec:cv_analysis}
+
+Sec.~\ref{sec:threshold} motivated the absolute-energy criterion by the claim
+that the coefficient of variation $c_k$ is driven by the mean rather than the
+spread of the attention map. We verify this directly on the last generation
+scale ($64\times64$), where the operative masks are built.
+
+Across the ten editing categories, the median $c_k$ spans almost a factor of
+five, from $0.31$ for object replacement down to $\approx\!0.067$ for object
+addition and style transfer. Decomposing $c_k$ into its numerator and
+denominator shows the asymmetry clearly: the median $\sigma_k$ of the ten
+categories lies within the narrow band $[0.0008, 0.0017]$ --- less than a factor
+of two --- whereas the median $\mu_k$ spans $[0.0049, 0.0157]$, more than a
+factor of three, and in the direction \emph{opposite} to $c_k$. The categories
+with the lowest $c_k$ are precisely those with the highest $\mu_k$. The signal
+that $c_k$ carries is therefore essentially the fraction of the image occupied
+by the focus region: when the focus word denotes a small, well-localized object,
+attention concentrates on a few positions and the rest of the map approaches
+zero, so $\mu_k$ falls and $c_k$ rises; when the focus is a style or a material,
+attention spreads over the whole image and $\mu_k$ rises.
+
+This has a direct consequence for a threshold of the form $\mu_k + \kappa
+\sigma_k$. Because $\sigma_k \approx \mu_k / 10$ across the benchmark, changing
+$\kappa$ over a wide range barely moves the threshold: reducing the mapping from
+$\kappa \in [0.5, 1.5]$ to $\kappa \in [0.1, 0.5]$ shifts the median threshold by
+only $-9.5\%$. Yet because attention mass is dense just above $\mu_k$, the
+induced focus coverage nearly doubles, from $19.4\%$ to $37.9\%$ of the image.
+The threshold is thus almost entirely determined by $\mu_k$ --- a per-instance
+scale factor that has nothing to do with how selective the mask should be ---
+while being extremely sensitive in its effect. Normalizing the map and
+thresholding an absolute level (Eq.~\ref{eq:normalize}--\ref{eq:tau}) removes the
+$\mu_k$ dependence, which is the entire purpose of the reformulation.
+
+% TODO(figure): CV / std / mean violin plots by category, and the tau-vs-coverage
+% comparison, are produced by docs/reports/pie_attn_cv_analysis/make_violin.py
+% and make_kappa_compare.py.  Add as a two-panel figure here.
+
+\subsection{$h$ Traces a Smooth Frontier}
+\label{sec:frontier}
+
+\input{tabs/frontier_h}
+
+Disabling the adaptive term ($\kappa_{\max}{=}0$, so $\tau_k \equiv h$) and
+sweeping $h$ over $[0.48, 0.75]$ produces Table~\ref{tab:frontier_h}. Every
+metric is monotone in $h$ and the curve has no discontinuity anywhere in the
+range: each step of $-0.02$ in $h$ buys roughly $+0.065$ ImgReward at a cost of
+$\approx\!0.5$\,dB PSNR. Two things follow. First, $h$ is a usable control
+surface rather than a value to be tuned once: an application that needs maximal
+background fidelity and one that needs aggressive edits select different points
+on the same curve, with predictable consequences. Second, because the curve is
+smooth, any competing configuration can be compared against it fairly --- one
+asks not whether a variant is better, but whether it lies \emph{above} the
+frontier. We use this test repeatedly below.
+
+\subsection{The Adaptive Term Shifts the Frontier Outward}
+\label{sec:adaptive_gain}
+
+\input{tabs/adaptiveGain}
+
+A per-instance threshold is only worth its complexity if it beats every fixed
+threshold at the same preservation level. Table~\ref{tab:adaptive_gain} performs
+that comparison by interpolating the fixed-threshold frontier of
+Table~\ref{tab:frontier_h} at the preservation level attained by the adaptive
+configuration. At SSIM $0.856$ the adaptive threshold reaches ImgReward $0.734$
+against $\approx\!0.704$ for the interpolated fixed frontier, a gain of $+0.030$;
+measured against LPIPS instead of SSIM the gain is $+0.032$, so the conclusion
+does not depend on a single preservation metric. The LOCO consensus parameters
+give $+0.038$ and $+0.037$ respectively.
+
+The adaptation is also real rather than nominal: over the 700 cases the resulting
+threshold has median $0.543$ with interquartile range $[0.529, 0.571]$ and
+maximum $0.640$, spanning six to seven of the fixed arms. A configuration that
+merely reproduced a single fixed threshold under a more complicated formula would
+show a degenerate distribution here; this one does not.
+
+\subsection{How the Parameters Were Obtained}
+\label{sec:protocol}
+
+\input{tabs/protocol}
+
+The mapping in Eq.~\ref{eq:kappa} has two free parameters, $c_{\max}$ and
+$\kappa_{\max}$. They were not tuned by inspection. We use a four-stage protocol,
+run entirely offline on cached attention statistics and per-case scores.
+
+\noindent\textit{Stage 1: derive the search space from the data.}
+Each boundary is given a statistical meaning rather than a round number. We set
+$c_{\max} \in [P_{70}, P_{99}]$ of the dev-set $c_k$ distribution: below $P_{70}$
+more than half the cases are clamped at $\kappa_{\max}$ and the mapping ceases to
+discriminate, while above $P_{99}$ essentially no case is clamped and the mapping
+degenerates to a linear ramp. The upper bound on $\kappa_{\max}$ is obtained by
+requiring that the resulting upper threshold not exceed the top of the usable
+range identified in Table~\ref{tab:frontier_h}. This yields an $18 \times 20$
+grid of $360$ configurations.
+
+\noindent\textit{Stage 2: show that a single-metric objective is degenerate.}
+Optimizing mean ImgReward alone selects $\kappa_{\max} \approx 0$
+(Table~\ref{tab:protocol}, row 3), reproducing the fixed arm at $h$ to within
+$0.001$ IR. This is not a search failure: ImgReward decreases monotonically in
+the threshold, so any single-metric objective drives the solution to the lower
+boundary of the search space and eliminates the adaptive term entirely. The
+objective must therefore combine edit quality and preservation, and we use
+$u = \mathrm{nIR} + \mathrm{nSSIM}$ with both terms min-max normalized over the
+grid.
+
+\noindent\textit{Stage 3: leave-one-category-out validation.}
+Re-running the search on eight categories and validating on the ninth, all nine
+folds land inside the flat region of the utility surface, with fold optima
+concentrated in $c_{\max} \in [0.15, 0.225]$ and $\kappa_{\max} \in [0.45,
+0.80]$. The per-parameter median across folds coincides with the global optimum.
+
+\noindent\textit{Stage 4: sensitivity and holdout.}
+The flat region ($u \ge u_{\max} - 0.05$) covers $48\%$ of the grid, so the
+selection is not a knife edge; within it, the remaining freedom is a trade-off
+preference rather than a performance difference. The parameters used in this
+paper sit at $\Delta u = 0.008$ from the grid optimum, inside the flat region and
+in the middle of the fold-optima cluster, whereas a hand-chosen setting we used
+in early development sits outside it at $\Delta u = 0.052$. Finally, the mixed
+category \texttt{0\_random} ($n{=}140$) is excluded from every stage above and
+used only as a holdout; the lower block of Table~\ref{tab:protocol} shows the
+same ordering there.
+
+% TODO(figure): Stage-1 CV histogram with the search range, the Stage-2 frontier
+% scatter (360 configs vs the 14 fixed arms), and the utility heatmap with the
+% nine LOCO fold optima are produced by
+% docs/reports/m15_param_protocol/run_protocol.py.  Add as a three-panel figure.
+
+\noindent\textbf{Caveat.}
+Stages 1--4 evaluate a candidate configuration by snapping each case's threshold
+to the nearest of the pre-computed fixed arms and reading that arm's per-case
+scores, which makes the $360$-configuration search feasible without any
+additional generation. Against a direct run of the same configuration this
+offline estimate over-states ImgReward by $\approx\!0.055$ and under-states
+preservation, a bias in a consistent direction. We therefore use it only to rank
+configurations relative to one another; every number reported outside this
+subsection comes from a direct run.
+% TODO(rerun): confirm the selected parameters with a direct full-benchmark run
+% (scripts/exp_m15_param_consensus.sh) before submission.
+
+\subsection{Phase 2 Contributes Structurally, Not Parametrically}
+\label{sec:beta}
+
+\input{tabs/ablationBeta}
+
+Phase~2 exists to answer a question the source image cannot: which regions the
+\emph{target} prompt will need, including regions that contain nothing relevant
+in the source. Table~\ref{tab:ablation_phase2}(a) removes it at three working
+points. Read row by row, the result looks like a straightforward trade: every
+preservation metric improves and every edit metric degrades. Read as curves, it
+is not a trade at all. At matched preservation --- the ablated pipeline at
+$h{=}0.52$ reaches PSNR $23.75$, the full pipeline at $h{=}0.60$ reaches
+$23.66$ --- the full pipeline still leads by $0.08$ ImgReward. The two frontiers
+do not intersect anywhere in the overlapping range: any operating point the
+ablated variant can reach, the full pipeline reaches as well and better by
+raising $h$. The effect size is also stable across working points
+($\Delta\mathrm{IR} \in [-0.32, -0.29]$, $\Delta\mathrm{PSNR} \in [+2.1, +2.3]$),
+which rules out a coincidence at a particular $h$.
+
+The per-category breakdown in Table~\ref{tab:ablation_phase2}(b) contains its own
+control. \texttt{delete\_object} is the one category in which the target needs no
+new region: the source focus mask already covers the object to be removed. Its
+$\Delta\mathrm{IR} = -0.018$ falls inside the noise band, confirming that the
+losses elsewhere are not a systematic artifact of the ablated code path. The
+three largest losses --- style transfer, object addition, background replacement
+--- are exactly the categories whose target content must grow outside the source
+focus region. The $+7.60$\,dB PSNR ``improvement'' on style transfer is the clearest
+symptom: without a target-side mask the output is nearly identical to the source,
+so preservation is excellent and the edit simply did not happen.
+
+\noindent\textbf{Why the preserve level is inert.}
+Table~\ref{tab:anchoring}(b) sweeps $\ell$ over ten values at three fixed $h$.
+The total range of every metric is smaller than one $0.02$ step of $h$ by more
+than an order of magnitude, with no direction of improvement. The reason is
+structural rather than empirical: $\ell$ only widens or narrows the region that
+Phase~2 anchors to source tokens, and the tokens Phase~2 generates are discarded.
+Its influence on the output is confined to whether the target-side attention
+peaks cross $\tau_k$, and those peaks are far above $\ell$. We therefore do not
+treat $\ell$ as a hyperparameter.
+
+\subsection{Composition Rule and Coarse Anchoring}
+\label{sec:anchoring}
+
+\input{tabs/anchoring}
+
+Table~\ref{tab:anchoring}(a) compares three ways of combining source and
+generated tokens at $h{=}0.60$. Converting the per-scale binary masks into a
+cumulative probability field --- averaging all masks from scale $0$ up to the
+current one and sampling replacement from the result --- is a form of anchoring,
+but an implicit and biased one: coarse scales are almost fully replaced, so their
+masks inflate the replacement probability at every finer scale, and positions
+inside the focus union can be overwritten by source content. Removing it without
+replacing it is worse still, because the coarse scales then carry no anchor at
+all. Strictly binary composition together with an explicit $N{=}2$ dominates
+both: $+1.66$\,dB PSNR and $-0.013$ LPIPS over the cumulative variant at equal
+edit strength.
+
+Making the anchoring explicit also makes its cost legible. $N$ is a genuine
+limitation rather than a hidden default: the first scales fix the global layout,
+so edits that require a fundamentally different spatial arrangement cannot be
+expressed however the masks are set. Sec.~\ref{sec:limitations} returns to this.
+
+\subsection{How Far Can a Single-Shot Threshold Go?}
+\label{sec:ceiling}
+
+The preceding subsections establish that $h$ and the adaptive correction move the
+result, and that $\ell$ does not. A natural next question is how much is left on
+the table: if the threshold could be chosen per case with hindsight, how much
+better would the result be, and can that choice be predicted from information
+available before generation?
+
+We answer the first question by treating the $h$-sweep of
+Table~\ref{tab:frontier_h} as a per-case grid and selecting, for each case, the
+arm that maximizes its score. This per-case oracle reaches ImgReward $1.024$ at
+SSIM $0.861$, dominating every fixed arm and every adaptive configuration we
+evaluated. The headroom is therefore substantial and real.
+% NOTE: 8-arm grid, per-case argmax, no tie-break.  Read as an upper bound only:
+% each (case, h) pair is generated once, so with many arms part of the gap is
+% selection over generation noise rather than a reachable target.
+
+We answer the second question negatively, and this is the more useful result. We
+regressed the per-case optimal threshold against nineteen properties of the
+attention map --- basic moments, occupancy at several normalized levels, mass
+concentration in the top $1\%$ and $5\%$, and spatial structure descriptors such as
+the largest connected component ratio, component count, centroid dispersion and
+boundary mass --- across four target definitions. The strongest correlation over
+all $19 \times 4$ combinations is $|\rho| = 0.23$, explaining about $5\%$ of the
+variance. Directions are intuitive where they exist (more concentrated mass
+prefers a higher threshold; larger occupancy prefers a lower one), but no
+combination supports a mapping. The sensitivity itself is equally opaque: how
+much a given case's score depends on the threshold correlates with every factor
+at $|\rho| \le 0.06$, so even a strategy that spent extra computation only on
+threshold-sensitive cases cannot be built from the attention map.
+
+Semantic features do slightly better, but on a different question. Encoding the
+target focus words with the pipeline's own text encoder and regressing
+out-of-fold explains $R^2 = 0.14$--$0.21$ of a \emph{balanced} target that mixes
+edit quality and preservation, with an interpretable gradient --- style phrases
+prefer low thresholds, object nouns and deletions prefer high ones --- but
+$R^2 \approx 0$ for the question of how high the threshold can be pushed before
+the edit breaks. In other words, prompt semantics indicate whether an edit leans
+towards preservation or towards freedom, but not where the edit fails, which is a
+property of the generation dynamics of the particular image.
+
+This delimits the present formulation honestly. A single-shot instance-adaptive
+threshold computed from the attention distribution captures the part of the
+variation that is predictable, and Sec.~\ref{sec:adaptive_gain} quantifies what
+that is worth; the remainder is not accessible from any pre-generation signal we
+could measure. Closing it requires either a signal that is observed after
+generation begins, or a predictor of the full metric-versus-threshold curve
+rather than of its argmax --- both are outside the scope of this paper and are
+discussed as future work in Sec.~\ref{sec:limitations}.

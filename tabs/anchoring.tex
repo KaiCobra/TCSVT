@@ -1,0 +1,49 @@
+%% Source: docs/reports/m14_minimal_rewrite_pipeline/report.md (Table 6,
+%%         experiment 6 "Phase-gamma mask decomposition") and experiment 7
+%%         (absolute_low sweep).
+%% Recipe: minimal rewrite, seed 1, PIE-Bench 700 cases, h = 0.60 for the
+%%         anchoring rows.
+\begin{table}[t]
+\centering
+\caption{(a) Composition rule and coarse anchoring, all at $h{=}0.60$. The
+implicit cumulative-probability field is dominated by strictly binary
+composition with an explicit $N{=}2$; removing the anchoring altogether is
+clearly worse. (b) Range of every metric when the preserve level $\ell$ is swept
+over ten values at fixed $h$, compared against the effect of a single $0.02$ step
+in $h$. Full PIE-Bench (700 cases).}
+\label{tab:anchoring}
+\small
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{l|cccc|cc}
+\toprule
+Composition & S.D.$\downarrow$ & PSNR$\uparrow$ & SSIM$\uparrow$ & LPIPS$\downarrow$ & HPSv2$\uparrow$ & ImgReward$\uparrow$ \\
+\midrule
+Cumulative prob., no explicit $N$ & 0.0329 & 22.00 & 0.856 & 0.0838 & 0.2621 & 0.555 \\
+Binary, no explicit $N$           & 0.0461 & 20.79 & 0.847 & 0.1009 & 0.2545 & 0.592 \\
+\rowcolor{gray!12}
+Binary $+$ explicit $N{=}2$ (ours) & \textbf{0.0331} & \textbf{23.66} & \textbf{0.882} & \textbf{0.0709} & 0.2536 & 0.550 \\
+\bottomrule
+\end{tabular}%
+}
+
+\vspace{2pt}
+\centerline{\footnotesize (a) Composition rule and coarse anchoring.}
+
+\vspace{6pt}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{l|ccc}
+\toprule
+Sweep & range of PSNR & range of ImgReward & range of HPSv2 \\
+\midrule
+$\ell \in [h{-}0.10,\, h{-}0.01]$, $h{=}0.50$ & 0.17 & 0.016 & 0.0008 \\
+$\ell \in [h{-}0.10,\, h{-}0.01]$, $h{=}0.52$ & 0.18 & 0.025 & 0.0008 \\
+$\ell \in [h{-}0.10,\, h{-}0.01]$, $h{=}0.54$ & 0.16 & 0.036 & 0.0005 \\
+\midrule
+one step of $h$ ($0.02$), for reference & $\approx 0.50$ & $\approx 0.065$ & $\approx 0.0027$ \\
+\bottomrule
+\end{tabular}%
+}
+
+\vspace{2pt}
+\centerline{\footnotesize (b) The preserve level $\ell$ is inert.}
+\end{table}

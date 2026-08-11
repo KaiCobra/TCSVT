@@ -1,0 +1,21 @@
+\begin{algorithm}[t]
+\caption{Instance-Adaptive Mask Binarization}
+\label{alg:adaptive_threshold}
+\small
+\begin{algorithmic}[1]
+\Require Filtered attention $\hat{a}_k \in \mathbb{R}^{N_v}$; base level $h$;
+         CV range $[c_{\min}, c_{\max}]$; gain $\kappa_{\max}$; preserve level $\ell$
+\Ensure Focus mask $M_k^{\mathrm{f}}$, preserve mask $M_k^{\mathrm{p}}$
+
+\State $\mu_k \gets \mathrm{mean}(\hat{a}_k)$,\quad $\sigma_k \gets \mathrm{std}(\hat{a}_k)$
+\State $c_k \gets \sigma_k / \mu_k$ \Comment{coefficient of variation, on the \emph{raw} map}
+\State $\tilde{a}_k \gets \bigl(\hat{a}_k - \min \hat{a}_k\bigr) / \bigl(\max \hat{a}_k - \min \hat{a}_k\bigr)$
+       \Comment{min--max normalization}
+\State $\tilde{\sigma}_k \gets \mathrm{std}(\tilde{a}_k)$
+\State $\kappa \gets \kappa_{\max}\cdot\operatorname{clamp}\!\bigl((c_k - c_{\min})/(c_{\max} - c_{\min}),\,0,\,1\bigr)$
+\State $\tau_k \gets h + \kappa \cdot \tilde{\sigma}_k$ \Comment{$\tau_k \ge h$ since $\kappa \ge 0$}
+\State $M_k^{\mathrm{f}} \gets \mathbb{1}[\tilde{a}_k \ge \tau_k]$,\quad
+       $M_k^{\mathrm{p}} \gets \mathbb{1}[\tilde{a}_k < \ell]$
+\State \Return $M_k^{\mathrm{f}},\, M_k^{\mathrm{p}}$
+\end{algorithmic}
+\end{algorithm}
