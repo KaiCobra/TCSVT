@@ -5,7 +5,7 @@
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{l l c c c c c c c c c c c}
 \toprule
-Method & Base Model & Param. & S.D.$\downarrow$ & PSNR$\uparrow$ & SSIM$\uparrow$ & LPIPS$\downarrow$ & CLIP whole$\uparrow$ & CLIP edited$\uparrow$ & HPSv2$\uparrow$ & ImgReward$\uparrow$ & Resolution & Inf. Time$\downarrow$\\
+Method & Base Model & Param. & S.D.$\downarrow$ & PSNR$\uparrow$ & SSIM$\uparrow$ & LPIPS$\downarrow$ & CLIP whole$\uparrow$ & CLIP edited$\uparrow$ & HPSv2$^{\ddagger}\uparrow$ & ImgReward$^{\ddagger}\uparrow$ & Resolution & Inf. Time$\downarrow$\\
 \midrule
 Prompt-to-Prompt \cite{prompt2prompt} & Diffusion & 2B
 & \AutoCellDown{0.0694}{0.0222}{0.0694}{0}
@@ -156,6 +156,7 @@ Ours & VAR & 2B
 \end{tabular}%
 }
 \vspace{1pt}
-\raggedright{\footnotesize $^\dag$Results cited from the original paper; no official implementation has been released.}
+\raggedright{\footnotesize $^\dag$Results cited from the original paper; no official implementation has been released.\\
+$^\ddagger$HPSv2 and ImageReward are human-preference metrics we additionally measure; they are \emph{not} part of the six official PIE-Bench metrics (S.D., PSNR, SSIM, LPIPS, CLIP whole, CLIP edited).}
 \end{table*}
 

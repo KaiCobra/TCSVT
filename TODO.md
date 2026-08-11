@@ -1,6 +1,6 @@
 # TCSVT 待辦清單
 
-> 更新:2026-08-10。背後理由與實驗取捨見 `../docs/reports/TCSVT_migration_notes.md`。
+> 更新:2026-08-11。背後理由與實驗取捨見 `../docs/reports/TCSVT_migration_notes.md`。
 > **圖例**:🔴 必做 ・ 🟡 建議 ・ 🔵 加分
 > **狀態**:`[x]` 已做 ・ `[ ]` 待辦 ・ `[~]` 需先跑實驗 ・ `[?]` 需你決定
 
@@ -14,6 +14,7 @@
 | 2 | **全篇只考慮 method 15**,method 16/17 不列入 | 候選挑選相關內容全部移除;§V 改為「單發自適應閾值的分析與上限」 |
 | 3 | ACM 沒上 → **不是期刊延伸稿** | 不用寫「與 preliminary version 的差異」聲明;審稿意見僅當作「已知弱點清單」參考 |
 | 4 | 採用新章節架構 | **已實作**(§2) |
+| 5 | 標題改為 *Attention-Masked Token Composition for Training-Free Image Editing with Visual Autoregressive Models* | 標題、running head、以及 intro/§IV-D 兩處品牌式宣稱**已改**(§1-2) |
 
 ---
 
@@ -34,6 +35,21 @@
 - [x] 🔴 `equations/algor2.tex` Algorithm 2 更新(加入兩條 source 通道、明示 Phase 2 的 token 被丟棄)
 - [x] 🔴 連帶改掉描述的四處:`1_abstract.tex`、`2_introduction.tex`(內文 + 貢獻列)、`7_experiments.tex` 的 implementation details
 - [x] 🔴 移除 `tabs/ablationThreshold.tex` 的 (a) 表(adaptive vs 70/80/90% fixed percentile)—— 那是舊排序式公式的消融,新公式下不成立;(b) 的 IQR 部分拆成 `tabs/ablationIQRtable.tex` 保留
+
+### 1-2. ✅ 標題與 "understanding" 宣稱
+
+- [x] 🔴 `main.tex` `\title{}` 改為
+      **Attention-Masked Token Composition for Training-Free Image Editing with Visual Autoregressive Models**
+- [x] 🔴 `\markboth{}` running head 用短版 "Attention-Masked Token Composition for Training-Free Image Editing"
+- [x] 🟡 內文兩處品牌式宣稱改寫成描述機制(我的判斷,可還原):
+      - `tex/2_introduction.tex`:"realize an *understanding-before-editing* pipeline"
+        → "localize the edit from the model's own attention before any token is rewritten"
+      - `tex/5_method.tex` §IV-D:"Central to our *understanding-before-editing* design"
+        → "Composition needs to know which regions the edit will affect before any token is replaced"
+      理由:標題拿掉這個宣稱是因為它未經量測;內文留著會變成「有宣稱、沒證據、標題也不再幫忙鋪陳」,
+      比原本更糟。全篇已無 "understanding-before-editing" 字樣。
+- [ ] 🟡 **未動**:intro 第一條貢獻仍寫 "the **first** attention-map-driven editing framework for VAR"。
+      AREdit / EditInfinity 都在這條線上,這個 "first" 是同類型的免費攻擊點,建議一併軟化。
 
 ### 還需要你確認的
 
@@ -99,8 +115,8 @@ Appendix A–E                      tex/A_appendix.tex
 
 ### 靜態檢查結果(重構後)
 
-52 labels / 62 refs 無 dangling ・ 所有 `\input` 目標存在 ・ cite key 全部在 `main.bib` ・
-所有圖檔存在 ・ 環境與括號配對正確。
+39 個 tex / 62 labels / 48 refs 無 dangling ・ 17 張圖 ・ 8 張表 ・
+所有 `\input` 目標與圖檔存在 ・ cite key 全部在 `main.bib` ・ 環境與括號配對正確。
 
 ---
 
@@ -201,9 +217,20 @@ cd TCSVT_edited && latexmk -pdf main.tex
 - [ ] 🟡 **Appendix E — 更多質化結果**:每類別 2–3 組。期刊附錄有空間,
       這是回應「evaluation scope 太窄」最便宜的做法
 
-### 5-5. 圖(§V 目前只有表,沒有圖)
+### 5-5. ✅ 圖已補齊(17 張)
 
-`tex/6_analysis.tex` 有三個 `% TODO(figure)`,產圖腳本都現成:
+`figs/make_paper_figures.py` 從原始 per-case 評估輸出重新產生所有分析圖(英文、論文口徑)。
+報告裡的原圖不能用:`m14_no_beta_ablation` / `m14_minimal_rewrite_pipeline` 的圖是**中文軸標**,
+質化圖的欄位標題也是中文燒進去的。
+
+新增:`fig_cv_decomposition`(CV 分解)、`fig_frontier_h`、`fig_adaptive_frontier`(增益殘差)、
+`fig_protocol`(搜尋範圍 + 效用面 + LOCO)、`fig_beta_frontier` / `fig_beta_category` /
+`fig_beta_qualitative`、`fig_anchoring`、`fig_besth_vs_cv`、`fig_blend`。
+
+重跑時修正的三個數字:平坦區 45%(非 48%)、LOCO 共識 (0.175, 0.55)(非與全域最優重合)、
+144/700 案的 unedited-region 指標為 NaN 故須逐指標 nanmean。
+
+~~原本待做的產圖(已完成)~~:
 
 - [ ] 🟡 CV / σ / μ 的 violin plot + τ-vs-coverage 對照
       → `docs/reports/pie_attn_cv_analysis/make_violin.py`、`make_kappa_compare.py`
@@ -240,7 +267,7 @@ ACM 沒上,所以下表純粹當「這些弱點是真的、TCSVT 審稿人也可
 | design choices 是 heuristic | §V-D(統計推導搜尋空間、單指標會退化、LOCO 9/9、平坦區 48%) | ✅ |
 | prompt 不對稱時的 robustness | §VII-D + Appendix D | 🟡 附錄待寫 |
 | 只在 PIE-Bench 上測 | — | ⚠️ 未處理。GranD-f 那條線(mask 品質 AUROC)這次沒放進來 |
-| understanding-before-editing 缺直接證據 | §IV-C / §V 全章(改用「哪些機制真的有效」的證據取代) | 🟡 語氣已降,但沒有 mask-vs-GT 的直接量化 |
+| understanding-before-editing 缺直接證據 | **已從標題與內文移除**(2026-08-11)。標題改為 Attention-Masked Token Composition...;intro 與 §IV-D 的兩句品牌式宣稱改寫成描述機制 | ✅ 不再宣稱,故不需要 mask-vs-GT 量化;若日後想放回,需先補 GranD-f AUROC 並處理與 §VI-D IQR 消融的張力 |
 | 「勝過 AREdit 全部六項」不正確 | §VI-B | ✅ 已改成 4 勝 2 負 + 差異說明 |
 | baseline 解析度不一致 | §VI-B(`% TODO(R3-W9)`) | ⚠️ 待處理 |
 
