@@ -3,14 +3,17 @@
 %%         (absolute_low sweep).
 %% Recipe: minimal rewrite, seed 1, PIE-Bench 700 cases, h = 0.60 for the
 %%         anchoring rows.
+%% Convention: best in bold, second best underlined (panel (a) only; panel (b)
+%%         reports ranges, for which a ranking is meaningless).
 \begin{table}[t]
 \centering
-\caption{(a) Composition rule and coarse anchoring, all at $h{=}0.60$. The
-implicit cumulative-probability field is dominated by strictly binary
-composition with an explicit $N{=}2$; removing the anchoring altogether is
-clearly worse. (b) Range of every metric when the preserve level $\ell$ is swept
-over ten values at fixed $h$, compared against the effect of a single $0.02$ step
-in $h$. Full PIE-Bench (700 cases).}
+\caption{(a) Composition rule and coarse anchoring, all at $h{=}0.60$.
+\textbf{Bold} is the best, \uline{underline} the second best. Binary composition
+with an explicit $N{=}2$ buys $+1.66$\,dB PSNR and $-0.013$ LPIPS over the
+implicit cumulative field at essentially unchanged edit strength; the cumulative
+field retains a marginally lower Structure Distance. (b) Range of every metric
+when the preserve level $\ell$ is swept over ten values at fixed $h$, compared
+against the effect of a single $0.02$ step in $h$. Full PIE-Bench (700 cases).}
 \label{tab:anchoring}
 \small
 \resizebox{\linewidth}{!}{%
@@ -18,10 +21,10 @@ in $h$. Full PIE-Bench (700 cases).}
 \toprule
 Composition & S.D.$\downarrow$ & PSNR$\uparrow$ & SSIM$\uparrow$ & LPIPS$\downarrow$ & HPSv2$\uparrow$ & ImgReward$\uparrow$ \\
 \midrule
-Cumulative prob., no explicit $N$ & 0.0329 & 22.00 & 0.856 & 0.0838 & 0.2621 & 0.555 \\
-Binary, no explicit $N$           & 0.0461 & 20.79 & 0.847 & 0.1009 & 0.2545 & 0.592 \\
+Cumulative prob., no explicit $N$ & \textbf{0.0329} & \uline{22.00} & \uline{0.856} & \uline{0.0838} & \textbf{0.2621} & \uline{0.555} \\
+Binary, no explicit $N$           & 0.0461 & 20.79 & 0.847 & 0.1009 & \uline{0.2545} & \textbf{0.592} \\
 \rowcolor{gray!12}
-Binary $+$ explicit $N{=}2$ (ours) & \textbf{0.0331} & \textbf{23.66} & \textbf{0.882} & \textbf{0.0709} & 0.2536 & 0.550 \\
+Binary $+$ explicit $N{=}2$ (ours) & \uline{0.0331} & \textbf{23.66} & \textbf{0.882} & \textbf{0.0709} & 0.2536 & 0.550 \\
 \bottomrule
 \end{tabular}%
 }

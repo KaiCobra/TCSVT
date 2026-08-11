@@ -228,9 +228,12 @@ but an implicit and biased one: coarse scales are almost fully replaced, so thei
 masks inflate the replacement probability at every finer scale, and positions
 inside the focus union can be overwritten by source content. Removing it without
 replacing it is worse still, because the coarse scales then carry no anchor at
-all. Strictly binary composition together with an explicit $N{=}2$ dominates
-both: $+1.66$\,dB PSNR and $-0.013$ LPIPS over the cumulative variant at equal
-edit strength.
+all. Strictly binary composition together with an explicit $N{=}2$ buys
+$+1.66$\,dB PSNR and $-0.013$ LPIPS over the cumulative variant at essentially
+unchanged edit strength ($0.550$ vs.\ $0.555$ ImageReward, inside the noise
+band); the cumulative variant retains a marginally lower Structure Distance
+($0.0329$ vs.\ $0.0331$), the one preservation metric on which the two are
+level.
 
 Making the anchoring explicit also makes its cost legible. $N$ is a genuine
 limitation rather than a hidden default: the first scales fix the global layout,

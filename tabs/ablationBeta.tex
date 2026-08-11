@@ -1,13 +1,16 @@
 %% Source: docs/reports/m14_no_beta_ablation/report.md (Tables 1-2).
 %% Recipe: minimal rewrite + cum0 + N2, seed 1, PIE-Bench 700 cases.
-%% "w/o Phase 2" = --skip_phase17 1 (the whole target-stream pass removed).
+%% "w/o Phase 2" = the whole target-stream pass removed.
+%% Convention in (a): best in bold, second best underlined, ranked over all six
+%% rows.  Panel (b) reports differences, for which a ranking is meaningless.
 \begin{table}[t]
 \centering
-\caption{Ablation of Phase~2, repeated at three working points. Removing
+\caption{Ablation of Phase~2, repeated at three working points. \textbf{Bold} is
+the best, \uline{underline} the second best, over all six rows. Removing
 Phase~2 improves \emph{every} preservation metric and degrades \emph{every} edit
 metric, but the two curves do not intersect: at matched preservation
 (w/o Phase~2 at $h{=}0.52$, PSNR $23.75$ vs.\ with Phase~2 at $h{=}0.60$,
-PSNR $23.66$) the full pipeline still leads by $+0.08$ ImgReward. Phase~2 does
+PSNR $23.66$) the full pipeline still leads by $+0.08$ ImageReward. Phase~2 does
 not move the working point along the frontier --- it moves the whole frontier.}
 \label{tab:ablation_phase2}
 \small
@@ -16,14 +19,14 @@ not move the working point along the frontier --- it moves the whole frontier.}
 \toprule
 Config & $h$ & S.D.$\downarrow$ & PSNR$\uparrow$ & SSIM$\uparrow$ & LPIPS$\downarrow$ & HPSv2$\uparrow$ & ImgReward$\uparrow$ \\
 \midrule
-Full (ours)   & 0.52 & 0.0467 & 21.64 & 0.849 & 0.0978 & \textbf{0.2623} & \textbf{0.777} \\
-w/o Phase 2   & 0.52 & \textbf{0.0326} & \textbf{23.75} & \textbf{0.877} & \textbf{0.0731} & 0.2541 & 0.469 \\
+Full (ours)  & 0.52 & 0.0467 & 21.64 & 0.849 & 0.0978 & \textbf{0.2623} & \textbf{0.777} \\
+w/o Phase 2 & 0.52 & 0.0326 & 23.75 & 0.877 & 0.0731 & 0.2541 & 0.469 \\
 \midrule
-Full (ours)   & 0.54 & 0.0432 & 22.18 & 0.859 & 0.0903 & \textbf{0.2596} & \textbf{0.713} \\
-w/o Phase 2   & 0.54 & \textbf{0.0298} & \textbf{24.36} & \textbf{0.884} & \textbf{0.0671} & 0.2524 & 0.397 \\
+Full (ours)  & 0.54 & 0.0432 & 22.18 & 0.859 & 0.0903 & \uline{0.2596} & \uline{0.713} \\
+w/o Phase 2 & 0.54 & \uline{0.0298} & \uline{24.36} & \uline{0.884} & \uline{0.0671} & 0.2524 & 0.397 \\
 \midrule
-Full (ours)   & 0.60 & 0.0331 & 23.66 & 0.882 & 0.0709 & \textbf{0.2536} & \textbf{0.550} \\
-w/o Phase 2   & 0.60 & \textbf{0.0216} & \textbf{25.95} & \textbf{0.903} & \textbf{0.0521} & 0.2499 & 0.264 \\
+Full (ours)  & 0.60 & 0.0331 & 23.66 & 0.882 & 0.0709 & 0.2536 & 0.550 \\
+w/o Phase 2 & 0.60 & \textbf{0.0216} & \textbf{25.95} & \textbf{0.903} & \textbf{0.0521} & 0.2499 & 0.264 \\
 \bottomrule
 \end{tabular}%
 }
