@@ -25,3 +25,7 @@
 .DS_Store
 .vscode/
 .omc/
+
+# Python
+__pycache__/
+*.pyc

@@ -38,8 +38,8 @@ that the coefficient of variation $c_k$ is driven by the mean rather than the
 spread of the attention map. We verify this directly on the last generation
 scale ($64\times64$), where the operative masks are built.
 
-Across the ten editing categories, the median $c_k$ spans almost a factor of
-five, from $0.31$ for object replacement down to $\approx\!0.067$ for object
+Fig.~\ref{fig:cv_decomposition} makes the decomposition explicit.
+Across the ten editing categories, the median $c_k$ spans a factor of $4.8$, from $0.31$ for object replacement down to $\approx\!0.067$ for object
 addition and style transfer. Decomposing $c_k$ into its numerator and
 denominator shows the asymmetry clearly: the median $\sigma_k$ of the ten
 categories lies within the narrow band $[0.0008, 0.0017]$ --- less than a factor
@@ -64,17 +64,17 @@ while being extremely sensitive in its effect. Normalizing the map and
 thresholding an absolute level (Eq.~\ref{eq:normalize}--\ref{eq:tau}) removes the
 $\mu_k$ dependence, which is the entire purpose of the reformulation.
 
-% TODO(figure): CV / std / mean violin plots by category, and the tau-vs-coverage
-% comparison, are produced by docs/reports/pie_attn_cv_analysis/make_violin.py
-% and make_kappa_compare.py.  Add as a two-panel figure here.
+\input{imgs/fig_cv_decomposition}
 
 \subsection{$h$ Traces a Smooth Frontier}
 \label{sec:frontier}
 
 \input{tabs/frontier_h}
+\input{imgs/fig_frontier_h}
 
 Disabling the adaptive term ($\kappa_{\max}{=}0$, so $\tau_k \equiv h$) and
-sweeping $h$ over $[0.48, 0.75]$ produces Table~\ref{tab:frontier_h}. Every
+sweeping $h$ over $[0.48, 0.75]$ produces Table~\ref{tab:frontier_h} and
+Fig.~\ref{fig:frontier_h}. Every
 metric is monotone in $h$ and the curve has no discontinuity anywhere in the
 range: each step of $-0.02$ in $h$ buys roughly $+0.065$ ImgReward at a cost of
 $\approx\!0.5$\,dB PSNR. Two things follow. First, $h$ is a usable control
@@ -89,16 +89,17 @@ frontier. We use this test repeatedly below.
 \label{sec:adaptive_gain}
 
 \input{tabs/adaptiveGain}
+\input{imgs/fig_adaptive_frontier}
 
 A per-instance threshold is only worth its complexity if it beats every fixed
 threshold at the same preservation level. Table~\ref{tab:adaptive_gain} performs
 that comparison by interpolating the fixed-threshold frontier of
 Table~\ref{tab:frontier_h} at the preservation level attained by the adaptive
-configuration. At SSIM $0.856$ the adaptive threshold reaches ImgReward $0.734$
+configuration; Fig.~\ref{fig:adaptive_frontier}(b,\,c) plots the same quantity
+for all 360 configurations. At SSIM $0.856$ the adaptive threshold reaches ImgReward $0.734$
 against $\approx\!0.704$ for the interpolated fixed frontier, a gain of $+0.030$;
 measured against LPIPS instead of SSIM the gain is $+0.032$, so the conclusion
-does not depend on a single preservation metric. The LOCO consensus parameters
-give $+0.038$ and $+0.037$ respectively.
+does not depend on a single preservation metric. The leave-one-category-out consensus parameters give $+0.037$ under both.
 
 The adaptation is also real rather than nominal: over the 700 cases the resulting
 threshold has median $0.543$ with interquartile range $[0.529, 0.571]$ and
@@ -110,10 +111,12 @@ show a degenerate distribution here; this one does not.
 \label{sec:protocol}
 
 \input{tabs/protocol}
+\input{imgs/fig_protocol}
 
 The mapping in Eq.~\ref{eq:kappa} has two free parameters, $c_{\max}$ and
 $\kappa_{\max}$. They were not tuned by inspection. We use a four-stage protocol,
-run entirely offline on cached attention statistics and per-case scores.
+run entirely offline on cached attention statistics and per-case scores; the
+two stages that involve a choice are shown in Fig.~\ref{fig:protocol}.
 
 \noindent\textit{Stage 1: derive the search space from the data.}
 Each boundary is given a statistical meaning rather than a round number. We set
@@ -138,11 +141,13 @@ grid.
 \noindent\textit{Stage 3: leave-one-category-out validation.}
 Re-running the search on eight categories and validating on the ninth, all nine
 folds land inside the flat region of the utility surface, with fold optima
-concentrated in $c_{\max} \in [0.15, 0.225]$ and $\kappa_{\max} \in [0.45,
-0.80]$. The per-parameter median across folds coincides with the global optimum.
+concentrated in $c_{\max} \in [0.150, 0.225]$ and $\kappa_{\max} \in [0.45,
+0.80]$. The per-parameter median across folds is $(0.175, 0.55)$, one grid step
+from the global optimum $(0.150, 0.55)$ and, like it, well inside the flat
+region.
 
 \noindent\textit{Stage 4: sensitivity and holdout.}
-The flat region ($u \ge u_{\max} - 0.05$) covers $48\%$ of the grid, so the
+The flat region ($u \ge u_{\max} - 0.05$) covers $45\%$ of the grid, so the
 selection is not a knife edge; within it, the remaining freedom is a trade-off
 preference rather than a performance difference. The parameters used in this
 paper sit at $\Delta u = 0.008$ from the grid optimum, inside the flat region and
@@ -151,11 +156,6 @@ in early development sits outside it at $\Delta u = 0.052$. Finally, the mixed
 category \texttt{0\_random} ($n{=}140$) is excluded from every stage above and
 used only as a holdout; the lower block of Table~\ref{tab:protocol} shows the
 same ordering there.
-
-% TODO(figure): Stage-1 CV histogram with the search range, the Stage-2 frontier
-% scatter (360 configs vs the 14 fixed arms), and the utility heatmap with the
-% nine LOCO fold optima are produced by
-% docs/reports/m15_param_protocol/run_protocol.py.  Add as a three-panel figure.
 
 \noindent\textbf{Caveat.}
 Stages 1--4 evaluate a candidate configuration by snapping each case's threshold
@@ -173,11 +173,15 @@ subsection comes from a direct run.
 \label{sec:beta}
 
 \input{tabs/ablationBeta}
+\input{imgs/fig_beta_frontier}
+\input{imgs/fig_beta_category}
+\input{imgs/fig_beta_qualitative}
 
 Phase~2 exists to answer a question the source image cannot: which regions the
 \emph{target} prompt will need, including regions that contain nothing relevant
 in the source. Table~\ref{tab:ablation_phase2}(a) removes it at three working
-points. Read row by row, the result looks like a straightforward trade: every
+points, and Fig.~\ref{fig:beta_frontier} plots the two resulting curves. Read
+row by row, the result looks like a straightforward trade: every
 preservation metric improves and every edit metric degrades. Read as curves, it
 is not a trade at all. At matched preservation --- the ablated pipeline at
 $h{=}0.52$ reaches PSNR $23.75$, the full pipeline at $h{=}0.60$ reaches
@@ -188,8 +192,8 @@ raising $h$. The effect size is also stable across working points
 ($\Delta\mathrm{IR} \in [-0.32, -0.29]$, $\Delta\mathrm{PSNR} \in [+2.1, +2.3]$),
 which rules out a coincidence at a particular $h$.
 
-The per-category breakdown in Table~\ref{tab:ablation_phase2}(b) contains its own
-control. \texttt{delete\_object} is the one category in which the target needs no
+The per-category breakdown in Table~\ref{tab:ablation_phase2}(b) and
+Fig.~\ref{fig:beta_category} contains its own control. \texttt{delete\_object} is the one category in which the target needs no
 new region: the source focus mask already covers the object to be removed. Its
 $\Delta\mathrm{IR} = -0.018$ falls inside the noise band, confirming that the
 losses elsewhere are not a systematic artifact of the ablated code path. The
@@ -198,6 +202,7 @@ three largest losses --- style transfer, object addition, background replacement
 focus region. The $+7.60$\,dB PSNR ``improvement'' on style transfer is the clearest
 symptom: without a target-side mask the output is nearly identical to the source,
 so preservation is excellent and the edit simply did not happen.
+Fig.~\ref{fig:beta_qualitative} shows both failure modes directly.
 
 \noindent\textbf{Why the preserve level is inert.}
 Table~\ref{tab:anchoring}(b) sweeps $\ell$ over ten values at three fixed $h$.
@@ -213,8 +218,9 @@ treat $\ell$ as a hyperparameter.
 \label{sec:anchoring}
 
 \input{tabs/anchoring}
+\input{imgs/fig_anchoring}
 
-Table~\ref{tab:anchoring}(a) compares three ways of combining source and
+Table~\ref{tab:anchoring}(a) and Fig.~\ref{fig:anchoring} compare three ways of combining source and
 generated tokens at $h{=}0.60$. Converting the per-scale binary masks into a
 cumulative probability field --- averaging all masks from scale $0$ up to the
 current one and sampling replacement from the result --- is a form of anchoring,
@@ -249,7 +255,11 @@ evaluated. The headroom is therefore substantial and real.
 % each (case, h) pair is generated once, so with many arms part of the gap is
 % selection over generation noise rather than a reachable target.
 
-We answer the second question negatively, and this is the more useful result. We
+\input{imgs/fig_besth_vs_cv}
+
+We answer the second question negatively, and this is the more useful result.
+Fig.~\ref{fig:besth_vs_cv} shows the geometry: at every value of $c_k$ the
+per-case optimum covers essentially the whole grid. We
 regressed the per-case optimal threshold against nineteen properties of the
 attention map --- basic moments, occupancy at several normalized levels, mass
 concentration in the top $1\%$ and $5\%$, and spatial structure descriptors such as
