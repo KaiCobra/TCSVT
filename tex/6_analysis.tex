@@ -121,11 +121,29 @@ against $\approx\!0.704$ for the interpolated fixed frontier, a gain of $+0.030$
 measured against LPIPS instead of SSIM the gain is $+0.032$, so the conclusion
 does not depend on a single preservation metric. The leave-one-category-out consensus parameters give $+0.037$ under both.
 
-The adaptation is also real rather than nominal: over the 700 cases the resulting
-threshold has median $0.543$ with interquartile range $[0.529, 0.571]$ and
-maximum $0.640$, spanning six to seven of the fixed arms. A configuration that
-merely reproduced a single fixed threshold under a more complicated formula would
-show a degenerate distribution here; this one does not.
+The adaptation is also real rather than nominal. Instrumenting a direct run and
+recording $\tau_k$ at every scale of every case gives a median of $0.581$ with
+interquartile range $[0.549, 0.621]$, spanning most of the usable range of
+Table~\ref{tab:frontier_h}. A configuration that merely reproduced a single fixed
+threshold under a more complicated formula would show a degenerate distribution
+here; this one does not.
+
+The same instrumentation exposes a property of Eq.~\ref{eq:tau} that the
+formulation makes easy to overlook: $\tilde{\sigma}_k$ is computed from the
+normalized map \emph{at scale $k$}, and it is strongly scale-dependent. Its median
+falls monotonically from $0.299$ at the second scale to $0.139$ at the last, so
+the same $\kappa$ produces a bump at the coarse scales more than twice the size
+of the one it produces at the finest. Because $c_k$ is likewise larger at coarse
+scales, $\kappa$ saturates at $\kappa_{\max}$ for $24$--$41\%$ of cases
+depending on depth. The threshold is therefore tightest exactly where the layout
+is decided, and the induced focus coverage falls from $25\%$ at the second scale
+to $5.8\%$ at the last. Any calibration of $(c_{\max}, \kappa_{\max})$ that is
+performed on the statistics of a single scale will not transfer to the multi-scale
+run; Sec.~\ref{sec:protocol} returns to this.
+% TODO(protocol): the four-stage selection below is calibrated on last-scale
+% statistics only (sigma_norm ~ 0.138), whereas the run applies the rule at every
+% scale (sigma_norm median 0.190).  The selected kappa_max is therefore ~1.4x too
+% large in effect.  See docs/reports/m15_scale_dependence/report.md.
 
 \subsection{How the Parameters Were Obtained}
 \label{sec:protocol}
