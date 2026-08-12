@@ -1,9 +1,10 @@
-%% Convention: best in bold, second best underlined.
+%% Convention: bold = our reported configuration only; no per-column ranking.
 \begin{table}[t]
 \caption{Ablation on attention-based masking. \emph{Scale-$N$}: the first $N$
 scales are replaced with source tokens and no attention mask is applied at any
 later scale. \emph{Attn Mask}: the full three-phase pipeline. S.D.\ is Structure
-Distance. \textbf{Bold} is the best, \uline{underline} the second best.}
+Distance. \textbf{Bold} marks our configuration, as elsewhere in this paper;
+no per-column ranking is marked.}
 \label{tab:ablation_mask}
 \centering
 \small
@@ -12,11 +13,12 @@ Distance. \textbf{Bold} is the best, \uline{underline} the second best.}
 \toprule
 Config & S.D.$\downarrow$ & PSNR$\uparrow$ & SSIM$\uparrow$ & LPIPS$\downarrow$ & CLIPw$\uparrow$ & CLIPe$\uparrow$ \\
 \midrule
-Scale-1 & 0.0843 & 12.25 & 0.4330 & 0.3930 & \uline{0.2439} & \uline{0.2210} \\
+Scale-1 & 0.0843 & 12.25 & 0.4330 & 0.3930 & 0.2439 & 0.2210 \\
 Scale-2 & 0.0807 & 12.56 & 0.4450 & 0.3810 & 0.2427 & 0.2199 \\
 Scale-4 & 0.0611 & 14.08 & 0.4960 & 0.3190 & 0.2121 & 0.1946 \\
-Scale-6 & \uline{0.0424} & \uline{15.66} & \uline{0.5530} & \uline{0.2560} & 0.2001 & 0.1822 \\
+Scale-6 & 0.0424 & 15.66 & 0.5530 & 0.2560 & 0.2001 & 0.1822 \\
 \midrule
+\rowcolor{gray!12}
 Attn Mask (ours) & \textbf{0.0316} & \textbf{23.44} & \textbf{0.8565} & \textbf{0.0833} & \textbf{0.2613} & \textbf{0.2290} \\
 \bottomrule
 \end{tabular}}

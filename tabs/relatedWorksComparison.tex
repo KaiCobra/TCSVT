@@ -1,6 +1,10 @@
 \begin{table*}[t]
 \centering
-\caption{Comparison of different editing methods. \textbf{Bold} indicates the best, \uline{underline} indicates the second best. Darker color indicates better performance.}
+\caption{Comparison of different editing methods. Darker colour indicates
+better performance within a column. Following the convention used throughout
+this paper, \textbf{bold} marks our own method rather than the column best, so
+that the identical configuration is recognisable across every table; the
+colour gradient carries the ranking.}
 \label{tab:method_comparison_wo_kvedit}
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{l l c c c c c c c c c c c}
@@ -56,7 +60,7 @@ PnP \cite{PnP} & Diffusion & \textasciitilde1B
 & 8.0 \\
 
 PnP Inversion \cite{PnP_Inversion} & Diffusion & \textasciitilde1B
-& \AutoCellDown{0.0243}{0.0222}{0.0694}{1}
+& \AutoCellDown{0.0243}{0.0222}{0.0694}{0}
 & \AutoCellUp{22.46}{17.87}{25.33}{0}
 & \AutoCellUp{0.7968}{0.7114}{0.8565}{0}
 & \AutoCellDown{0.1061}{0.0833}{0.2088}{0}
@@ -98,7 +102,7 @@ RF-Inversion \cite{RF-inversion} & Flow & 12B
 & \AutoCellDown{0.1900}{0.0833}{0.2088}{0}
 & \AutoCellUp{0.2520}{0.2280}{0.2642}{0}
 & \AutoCellUp{0.2211}{0.2054}{0.2337}{0}
-& \AutoCellUp{0.2847}{0.2035}{0.2931}{1}
+& \AutoCellUp{0.2847}{0.2035}{0.2931}{0}
 & \AutoCellUp{0.5484}{-0.8649}{0.7344}{0}
 & 1k
 & 24.8 \\
@@ -106,12 +110,12 @@ RF-Inversion \cite{RF-inversion} & Flow & 12B
 ReFlex \cite{ReFlex} & Flow & 12B
 & \AutoCellDown{0.0312}{0.0222}{0.0694}{0}
 & \AutoCellUp{25.33}{17.87}{25.33}{0}
-& \AutoCellUp{0.8436}{0.7114}{0.8565}{1}
+& \AutoCellUp{0.8436}{0.7114}{0.8565}{0}
 & \AutoCellDown{0.0961}{0.0833}{0.2088}{0}
 & \AutoCellUp{0.2602}{0.2280}{0.2642}{0}
 & \AutoCellUp{0.2266}{0.2054}{0.2337}{0}
 & \AutoCellUp{0.2769}{0.2035}{0.2931}{0}
-& \AutoCellUp{0.7334}{-0.8649}{0.7344}{1}
+& \AutoCellUp{0.7334}{-0.8649}{0.7344}{0}
 & 1k
 & 12.4 \\
 
@@ -129,9 +133,9 @@ FireFlow \cite{FireFlow} & Flow & 12B
 \midrule
 AREdit$^\dag$ \cite{AREdit} & VAR & 2B
 & \AutoCellDown{0.0305}{0.0222}{0.0694}{0}
-& \AutoCellUp{24.19}{17.87}{25.33}{1}
+& \AutoCellUp{24.19}{17.87}{25.33}{0}
 & \AutoCellUp{0.8370}{0.7114}{0.8565}{0}
-& \AutoCellDown{0.0870}{0.0833}{0.2088}{1}
+& \AutoCellDown{0.0870}{0.0833}{0.2088}{0}
 & \AutoCellUp{0.2542}{0.2280}{0.2642}{0}
 & \AutoCellUp{0.2277}{0.2054}{0.2337}{0}
 & -
@@ -142,14 +146,14 @@ AREdit$^\dag$ \cite{AREdit} & VAR & 2B
 & 2.5 \\
 \rowcolor{gray!10}
 Ours & VAR & 2B
-& \AutoCellDown{0.0316}{0.0222}{0.0694}{0}
-& \AutoCellUp{23.44}{17.87}{25.33}{0}
-& \AutoCellUp{0.8565}{0.7114}{0.8565}{0}
-& \AutoCellDown{0.0833}{0.0833}{0.2088}{0}
+& \AutoCellDown{0.0316}{0.0222}{0.0694}{1}
+& \AutoCellUp{23.44}{17.87}{25.33}{1}
+& \AutoCellUp{0.8565}{0.7114}{0.8565}{1}
+& \AutoCellDown{0.0833}{0.0833}{0.2088}{1}
 & \AutoCellUp{0.2613}{0.2280}{0.2642}{1}
 & \AutoCellUp{0.2290}{0.2054}{0.2337}{1}
-& \AutoCellUp{0.2785}{0.2035}{0.2931}{0}
-& \AutoCellUp{0.7344}{-0.8649}{0.7344}{0}
+& \AutoCellUp{0.2785}{0.2035}{0.2931}{1}
+& \AutoCellUp{0.7344}{-0.8649}{0.7344}{1}
 & 1k
 & 2.5 \\
 \bottomrule

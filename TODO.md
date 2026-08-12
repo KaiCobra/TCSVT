@@ -170,20 +170,65 @@ cd TCSVT_edited && latexmk -pdf main.tex
 
 ## 5. 🔴 內容還要處理的
 
-### 5-1. Config 不一致(最重要)
+### 5-1. Config 不一致(最重要)— 2026-08-12 進行中
 
 `tex/6_analysis.tex` 開頭有一個大的 `⚠ CONFIG NOTE`:
 
 **§V 的每一個數字都來自 `minimal rewrite + cum0 + N2` 的 recipe,
 而 Table 1 是另一個 config。**
 
-三個選項,挑一個:
+**新發現(2026-08-12)**:投稿版 Table 1 的 ours
+(SD 0.0316 / PSNR 23.44 / SSIM 0.8565 / LPIPS 0.0833)**在 `outputs/` 下已經沒有對應的 run**。
+掃過全部 153 個 `summary.json`(含外接硬碟),最接近的一個四項指標仍差 4.6%。
+也就是說這組數字**無法重建、無法做同 config 的消融**,選項 (c)「明講差異」已不可行。
 
-- [?] (a) 用 §V 的 recipe 重跑 Table 1
-- [?] (b) 用 Table 1 的 recipe 重跑 §V 的所有實驗
-- [?] (c) 在 §V 開頭明講兩者的差異
+→ 定案走 **(a)**:用 §V 的 recipe 重跑,把 ours 統一成一次真跑。
 
-⚠️ 不能就這樣放著。這是這批報告最容易出事的地方 —— 混用世代的數字。
+已排下去(`scripts/exp_m15_ours_candidates.sh`,log/pid 在
+`outputs/outputs_loop_exp/exp_m15_ours_candidates.{log,pid}`):
+
+| 臂 | $(c_{\max}, \kappa_{\max})$ | 意義 |
+|---|---|---|
+| A | (0.15, 0.55) | protocol 的網格最優;LOCO 共識 (0.175, 0.55) 的鄰格 |
+| B | (0.20, 0.60) | 論文目前宣稱採用的工作點 |
+
+兩臂都是 m15 / h=0.50 / ℓ=0.49 / minimal rewrite / cum0 / N2 / seed 1 / 700 case。
+單臂約 3.5 小時。
+
+- [?] **跑完要挑一個當 ours**。建議 A:論文說「參數由 protocol 導出」,
+      那就該用 protocol 自己給的答案,否則評審會問「為什麼不用你自己的最優值」;
+      且 §V-C 的 adaptive gain 從 +0.030 變 +0.037、§V-D 的 Δu 從 0.008 變 0.000,
+      敘事全面變乾淨。選 B 的唯一理由是不用改 §V 既有的敘述。
+- [ ] 挑定後:Table 1 / `p2pAndAttnMask` / `ablationIQRtable` 的 ours 列換成真跑數字,
+      `tex/7_experiments.tex` 第 29/38/61/73 行的數字敘述跟著改。
+
+### 5-1b. 消融表要不要同 config 重跑
+
+`ablationBeta` / `anchoring` 目前跑在 **固定門檻臂($\kappa_{\max}=0$)** 上,
+不是 ours 的 config,所以這輪已把 "(ours)" 標籤拿掉、不加粗(見 §5-6)。
+若要讓每張表都有一列真正的 ours,還需要這些同 config 的臂:
+
+| 表 | 缺的臂 | 支數 |
+|---|---|---|
+| `ablationBeta` | ours 但 `--skip_phase17` | 1 |
+| `ablationIQRtable` | ours 但關掉 IQR | 1 |
+| `anchoring` (a) | ours 但 cum1 / 無 explicit N | 2 |
+| `p2pAndAttnMask` | Scale-1/2/4/6 同 recipe | 4 |
+
+- [?] 共 8 支 × 3.5h ≈ 28 小時。**要不要排?** 排的話等 A/B 挑定後再開,
+      免得挑錯工作點整批重跑。
+
+### 5-6. ✅ 表格標記慣例已改(2026-08-12)
+
+原本「最佳粗體、次佳底線」全部拿掉,改成 **粗體 = ours 那一列**,理由是
+同一個 config 要能在所有表之間被一眼認出來。
+
+- `main.tex` 的 `\AutoCellUp/Down` 第 4 個參數語意改了:原本是「次佳→底線」旗標,
+  現在是單純的**粗體旗標**(ours 列填 1,其餘填 0);顏色深淺仍然承載排名。
+- 沒有 ours 列的表(`frontier_h`)、以及跑在別的工作點的消融表
+  (`ablationBeta`、`anchoring`)一律不標,caption 已寫明原因。
+- `anchoring` 的 "(ours)" 改成 "(adopted)";`ablationBeta` 的 "Full (ours)" 改成
+  "Full pipeline" —— 等 §5-1b 的同 config 臂跑出來再改回 ours 並加粗。
 
 ### 5-2. Table 1
 

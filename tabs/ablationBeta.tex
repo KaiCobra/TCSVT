@@ -1,12 +1,16 @@
 %% Source: docs/reports/m14_no_beta_ablation/report.md (Tables 1-2).
 %% Recipe: minimal rewrite + cum0 + N2, seed 1, PIE-Bench 700 cases.
 %% "w/o Phase 2" = the whole target-stream pass removed.
-%% Convention in (a): best in bold, second best underlined, ranked over all six
-%% rows.  Panel (b) reports differences, for which a ranking is meaningless.
+%% Convention: nothing is marked.  Boldface is reserved paper-wide for the row
+%% carrying our reported configuration, and this ablation is run on the
+%% fixed-threshold arms (kappa_max = 0) at three working points, none of which
+%% is that configuration.  Panel (b) reports differences, which have no ranking.
 \begin{table}[t]
 \centering
-\caption{Ablation of Phase~2, repeated at three working points. \textbf{Bold} is
-the best, \uline{underline} the second best, over all six rows. Removing
+\caption{Ablation of Phase~2, repeated at three working points of the
+fixed-threshold family ($\kappa_{\max}{=}0$), so that the effect of Phase~2 is
+read at constant $\tau$; no row is our reported configuration and none is
+marked. Removing
 Phase~2 improves \emph{every} preservation metric and degrades \emph{every} edit
 metric, but the two curves do not intersect: at matched preservation
 (w/o Phase~2 at $h{=}0.52$, PSNR $23.75$ vs.\ with Phase~2 at $h{=}0.60$,
@@ -19,14 +23,14 @@ not move the working point along the frontier --- it moves the whole frontier.}
 \toprule
 Config & $h$ & S.D.$\downarrow$ & PSNR$\uparrow$ & SSIM$\uparrow$ & LPIPS$\downarrow$ & HPSv2$\uparrow$ & ImgReward$\uparrow$ \\
 \midrule
-Full (ours)  & 0.52 & 0.0467 & 21.64 & 0.849 & 0.0978 & \textbf{0.2623} & \textbf{0.777} \\
+Full pipeline & 0.52 & 0.0467 & 21.64 & 0.849 & 0.0978 & 0.2623 & 0.777 \\
 w/o Phase 2 & 0.52 & 0.0326 & 23.75 & 0.877 & 0.0731 & 0.2541 & 0.469 \\
 \midrule
-Full (ours)  & 0.54 & 0.0432 & 22.18 & 0.859 & 0.0903 & \uline{0.2596} & \uline{0.713} \\
-w/o Phase 2 & 0.54 & \uline{0.0298} & \uline{24.36} & \uline{0.884} & \uline{0.0671} & 0.2524 & 0.397 \\
+Full pipeline & 0.54 & 0.0432 & 22.18 & 0.859 & 0.0903 & 0.2596 & 0.713 \\
+w/o Phase 2 & 0.54 & 0.0298 & 24.36 & 0.884 & 0.0671 & 0.2524 & 0.397 \\
 \midrule
-Full (ours)  & 0.60 & 0.0331 & 23.66 & 0.882 & 0.0709 & 0.2536 & 0.550 \\
-w/o Phase 2 & 0.60 & \textbf{0.0216} & \textbf{25.95} & \textbf{0.903} & \textbf{0.0521} & 0.2499 & 0.264 \\
+Full pipeline & 0.60 & 0.0331 & 23.66 & 0.882 & 0.0709 & 0.2536 & 0.550 \\
+w/o Phase 2 & 0.60 & 0.0216 & 25.95 & 0.903 & 0.0521 & 0.2499 & 0.264 \\
 \bottomrule
 \end{tabular}%
 }
@@ -47,7 +51,7 @@ change\_object     & 80 & 0.694 & 0.438 & $-0.256$ & $+2.57$ \\
 attr.\ material    & 40 & 0.796 & 0.550 & $-0.246$ & $+2.60$ \\
 attr.\ content     & 40 & 0.872 & 0.640 & $-0.232$ & $+2.63$ \\
 \rowcolor{gray!12}
-delete\_object     & 80 & 0.819 & 0.801 & $\mathbf{-0.018}$ & $+0.19$ \\
+delete\_object     & 80 & 0.819 & 0.801 & $-0.018$ & $+0.19$ \\
 \bottomrule
 \end{tabular}%
 }

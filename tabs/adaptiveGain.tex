@@ -4,13 +4,14 @@
 %% an independent holdout (see tab:protocol).
 %% Offline evaluation: per-case tau is snapped to the nearest of the 14 h-arms and
 %% that arm's per-case scores are read off; used for RELATIVE ranking only.
-%% Convention: best in bold, second best underlined, over the four rows.
+%% Convention: bold = our reported configuration only; no per-column ranking.
 \begin{table}[t]
 \centering
 \caption{The CV-adaptive term shifts the frontier outward. At matched
 preservation, the adaptive threshold attains a higher edit score than any fixed
 threshold on the same frontier (the interpolation of the $\kappa_{\max}{=}0$
-arms). \textbf{Bold} is the best, \uline{underline} the second best. Dev set,
+arms). Following the convention used throughout this paper, \textbf{bold}
+marks our reported configuration rather than the column best. Dev set,
 $n{=}560$.}
 \label{tab:adaptive_gain}
 \small
@@ -20,12 +21,13 @@ $n{=}560$.}
 Configuration & ImgReward$\uparrow$ & SSIM$\uparrow$ & LPIPS$\downarrow$ & PSNR$\uparrow$ \\
 \midrule
 \multicolumn{5}{l}{\textit{Fixed threshold ($\kappa_{\max}{=}0$)}}\\
-$h = 0.52$ & \textbf{0.782} & 0.843 & 0.1023 & 21.17 \\
+$h = 0.52$ & 0.782 & 0.843 & 0.1023 & 21.17 \\
 $h = 0.54$ & 0.724 & 0.853 & 0.0940 & 21.73 \\
 \midrule
 \multicolumn{5}{l}{\textit{Adaptive threshold}}\\
-$(c_{\max}, \kappa_{\max}) = (0.20, 0.60)$ (ours) & \uline{0.734} & \uline{0.856} & \uline{0.0916} & \uline{21.98} \\
-$(c_{\max}, \kappa_{\max}) = (0.15, 0.55)$ (grid optimum) & 0.715 & \textbf{0.859} & \textbf{0.0890} & \textbf{22.12} \\
+\rowcolor{gray!12}
+$(c_{\max}, \kappa_{\max}) = (0.20, 0.60)$ (ours) & \textbf{0.734} & \textbf{0.856} & \textbf{0.0916} & \textbf{21.98} \\
+$(c_{\max}, \kappa_{\max}) = (0.15, 0.55)$ (grid optimum) & 0.715 & 0.859 & 0.0890 & 22.12 \\
 \midrule
 \multicolumn{5}{l}{\textit{Gain over the fixed-threshold frontier at matched preservation}}\\
 ours @ SSIM $0.856$ & \multicolumn{4}{l}{$0.734$ vs.\ $\approx 0.704$ interpolated \quad $(+0.030)$}\\

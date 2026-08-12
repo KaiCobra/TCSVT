@@ -2,7 +2,7 @@
 %% independently reproduced by figs/make_paper_figures.py.
 %% dev = 9 concrete editing categories (n=560); holdout = 0_random (n=140),
 %% excluded from every stage of parameter selection.
-%% Convention: best in bold, second best underlined, ranked within each block.
+%% Convention: bold = our reported configuration only; no per-column ranking.
 \begin{table}[t]
 \centering
 \caption{Parameter selection. The edit-only optimum collapses to
@@ -10,7 +10,8 @@ $\kappa_{\max}\!\to\!0$, i.e.\ back to a fixed threshold, which is why the
 selection objective must combine edit quality and preservation
 ($u = \mathrm{nIR} + \mathrm{nSSIM}$). The selected parameters transfer to a
 holdout category that never participated in any stage of the search.
-\textbf{Bold} is the best, \uline{underline} the second best, within each block.}
+\textbf{Bold} marks our reported configuration in both blocks; no per-column
+ranking is marked.}
 \label{tab:protocol}
 \small
 \resizebox{\linewidth}{!}{%
@@ -19,21 +20,21 @@ holdout category that never participated in any stage of the search.
 Configuration & ImgReward$\uparrow$ & SSIM$\uparrow$ & LPIPS$\downarrow$ & PSNR$\uparrow$ & $\Delta u$ \\
 \midrule
 \multicolumn{6}{l}{\textit{Dev set: nine editing categories, $n = 560$}}\\
-fixed $h{=}0.52$ & \uline{0.782} & 0.843 & 0.1023 & 21.17 & --- \\
+fixed $h{=}0.52$ & 0.782 & 0.843 & 0.1023 & 21.17 & --- \\
 fixed $h{=}0.54$ & 0.724 & 0.853 & 0.0940 & 21.73 & --- \\
-IR-only optimum $(0.125, 0.05)$ \emph{(degenerate)} & \textbf{0.822} & 0.833 & 0.1102 & 20.74 & --- \\
+IR-only optimum $(0.125, 0.05)$ \emph{(degenerate)} & 0.822 & 0.833 & 0.1102 & 20.74 & --- \\
 hand-tuned $(0.33, 0.43)$ & 0.772 & 0.846 & 0.0992 & 21.44 & 0.052 \\
 \rowcolor{gray!12}
-ours $(0.20, 0.60)$ & 0.734 & \uline{0.856} & \uline{0.0916} & \uline{21.98} & \textbf{0.008} \\
-grid optimum $(0.15, 0.55)$ & 0.715 & \textbf{0.859} & \textbf{0.0890} & \textbf{22.12} & \textbf{0.000} \\
+ours $(0.20, 0.60)$ & \textbf{0.734} & \textbf{0.856} & \textbf{0.0916} & \textbf{21.98} & \textbf{0.008} \\
+grid optimum $(0.15, 0.55)$ & 0.715 & 0.859 & 0.0890 & 22.12 & 0.000 \\
 \midrule
 \multicolumn{6}{l}{\textit{Holdout: \texttt{0\_random}, $n = 140$, never used for selection}}\\
-fixed $h{=}0.52$ & \textbf{0.757} & 0.873 & 0.0817 & 23.33 & --- \\
+fixed $h{=}0.52$ & 0.757 & 0.873 & 0.0817 & 23.33 & --- \\
 fixed $h{=}0.54$ & 0.669 & 0.879 & 0.0770 & 23.80 & --- \\
-hand-tuned $(0.33, 0.43)$ & \uline{0.708} & 0.877 & 0.0788 & 23.71 & --- \\
+hand-tuned $(0.33, 0.43)$ & 0.708 & 0.877 & 0.0788 & 23.71 & --- \\
 \rowcolor{gray!12}
-ours $(0.20, 0.60)$ & 0.657 & \uline{0.886} & \uline{0.0720} & \uline{24.32} & --- \\
-grid optimum $(0.15, 0.55)$ & 0.637 & \textbf{0.887} & \textbf{0.0705} & \textbf{24.47} & --- \\
+ours $(0.20, 0.60)$ & \textbf{0.657} & \textbf{0.886} & \textbf{0.0720} & \textbf{24.32} & --- \\
+grid optimum $(0.15, 0.55)$ & 0.637 & 0.887 & 0.0705 & 24.47 & --- \\
 \bottomrule
 \end{tabular}%
 }
