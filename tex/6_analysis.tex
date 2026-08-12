@@ -23,9 +23,20 @@
 The components introduced in Sec.~\ref{section:method} are not equally
 consequential, and several intuitively appealing knobs turn out to have no
 effect at all. This section isolates each one on the full benchmark and reports
-what actually moves the result and what does not. Unless stated otherwise, all numbers are averaged over
-the 700 PIE-Bench cases under a single fixed recipe, so that rows within this
-section are directly comparable to one another.
+what actually moves the result and what does not.
+
+\noindent\textbf{Scope of the numbers in this section.}
+This section is a controlled comparison, not a second report of our headline
+result. Every row here is produced under one common recipe held fixed across the
+whole section, and each experiment varies exactly one component of it, so that
+rows within the section are comparable to one another and differences can be
+attributed. That recipe is deliberately not the configuration of
+Table~\ref{tab:method_comparison_wo_kvedit}, which is the single configuration we
+report as our method and the only place the reader should read our scores from.
+Consequently the absolute values below are not directly comparable to
+Table~\ref{tab:method_comparison_wo_kvedit}; only the differences within this
+section are. Where a subsection additionally relies on an offline estimate rather
+than a direct run, this is stated at that point.
 
 \noindent\textbf{Noise scale.}
 Generation is not bit-exact (bf16 kernels with fused attention), so identical
@@ -102,7 +113,10 @@ threshold at the same preservation level. Table~\ref{tab:adaptive_gain} performs
 that comparison by interpolating the fixed-threshold frontier of
 Table~\ref{tab:frontier_h} at the preservation level attained by the adaptive
 configuration; Fig.~\ref{fig:adaptive_frontier}(b,\,c) plots the same quantity
-for all 360 configurations. At SSIM $0.856$ the adaptive threshold reaches ImgReward $0.734$
+for all 360 configurations. Both are offline estimates on the dev set (see the
+caveat at the end of Sec.~\ref{sec:protocol}), computed identically for the
+adaptive and the fixed arms so that the comparison between them is unaffected.
+At SSIM $0.856$ the adaptive threshold reaches ImgReward $0.734$
 against $\approx\!0.704$ for the interpolated fixed frontier, a gain of $+0.030$;
 measured against LPIPS instead of SSIM the gain is $+0.032$, so the conclusion
 does not depend on a single preservation metric. The leave-one-category-out consensus parameters give $+0.037$ under both.
