@@ -26,13 +26,23 @@ We build upon Infinity~\cite{Infinity} (2B parameters) with BSQ-VAE~\cite{BSQVAE
 \subsection{Comparison with State-of-the-Art Methods}
 
 \noindent\textbf{Quantitative results.}
-Table~\ref{tab:method_comparison_wo_kvedit} summarizes the comparison. Our method achieves the best SSIM (0.8565) and LPIPS (0.0833) among all methods, and the second-best CLIP whole (0.2613) and CLIP edited (0.2290), demonstrating strong background preservation and competitive edit quality with only 2B parameters --- 6$\times$ fewer than all flow-based baselines.
+Table~\ref{tab:method_comparison_wo_kvedit} summarizes the comparison. Our
+method attains the best SSIM ($0.8565$), the best LPIPS ($0.0833$) and the best
+ImageReward ($0.7344$) among all methods, together with the second-best CLIP
+whole ($0.2613$) and CLIP edited ($0.2290$). Preservation and edit quality are
+usually traded against one another --- the strongest preservation baselines sit
+near the bottom of the preference metrics and vice versa --- so leading on both
+sides simultaneously is the substantive result here, and it is obtained with
+only 2B parameters, $6\times$ fewer than all flow-based baselines.
 
 \textit{vs.\ diffusion-based methods.}
 Compared to the best diffusion-based method PnP Inversion, we improve SSIM by 7.5\% and LPIPS by 21.5\% while achieving higher CLIP scores on both whole-image and edited-region metrics.
 
 \textit{vs.\ flow-based methods.}
-Against the strongest flow-based competitor ReFlex, we attain better SSIM and LPIPS despite the 6$\times$ parameter gap, though ReFlex achieves higher PSNR.
+Against the strongest flow-based competitor ReFlex, we attain better SSIM
+($0.8565$ vs.\ $0.8436$), LPIPS ($0.0833$ vs.\ $0.0961$) and ImageReward
+($0.7344$ vs.\ $0.7334$) despite the $6\times$ parameter gap, though ReFlex
+achieves higher PSNR ($25.33$ vs.\ $23.44$).
 
 \textit{vs.\ AREdit.}
 AREdit~\cite{AREdit} is the closest comparison: a training-free editor on the same 2B VAR backbone. We obtain better SSIM ($0.8565$ vs.\ $0.8370$), LPIPS ($0.0833$ vs.\ $0.0870$), CLIP whole ($0.2613$ vs.\ $0.2542$) and CLIP edited ($0.2290$ vs.\ $0.2277$), while AREdit is better on Structure Distance ($0.0305$ vs.\ $0.0316$) and PSNR ($24.19$ vs.\ $23.44$). The two methods therefore occupy neighbouring points on the same trade-off curve rather than one dominating the other, and the comparison should be read alongside two differences in what is required of the user: AREdit calibrates cached token statistics with per-category thresholds supplied externally, whereas our masks are derived from the model's own attention with a single parameterization shared by all ten categories; and the operating point itself is exposed as a continuous control in our method (Sec.~\ref{sec:frontier}), so the preservation end of our frontier can be selected explicitly when Structure Distance and PSNR are the quantities of interest.

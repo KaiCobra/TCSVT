@@ -48,18 +48,9 @@ different ends of a preservation-versus-edit-strength axis, and neither dominate
 % full-res blend results are included; source
 % docs/new_exp/2026-07-22-fullres-blend-and-inverse-attention.md §2.
 
-\subsection{What Cannot Be Predicted Before Generation}
+\subsection{The Threshold Is Global, Not Per Case}
 
-Sec.~\ref{sec:ceiling} establishes an upper bound and a negative result: a
-per-case choice of threshold would improve every metric simultaneously, but that
-choice correlates with no measurable property of the attention map
-($|\rho| \le 0.23$ over nineteen factors), and prompt semantics predict only
-whether an edit leans towards preservation or freedom, not where it breaks
-($R^2 \approx 0$). Two directions remain open. One is to predict the entire
-metric-versus-threshold curve rather than its maximum, and select an operating
-point on the predicted curve --- this keeps the method single-shot. The other is
-to observe a signal after generation has begun, when the information that is
-missing beforehand becomes available. Both are outside the scope of this paper.
+A single $(h, c_{\max}, \kappa_{\max})$ is shared by every case, so the adaptation is driven only by the statistics of the attention map and not by how difficult the particular edit is. Choosing the operating point per case would require a signal that is not available before generation starts; predicting the whole metric-versus-threshold curve, or reading a signal after generation has begun, are the two natural routes and both are outside the scope of this paper.
 
 \subsection{Dependence on Focus-Word Extraction}
 

@@ -529,7 +529,8 @@ def main():
     print("F5 phase-2 frontier");   fig_beta(arms, nob)
     print("F6 phase-2 categories"); fig_beta_category(arms, nob)
     print("F7 anchoring");          fig_anchoring()
-    print("F8 best-h vs cv");       fig_besth_vs_cv(sim_all)
+    # F8 (best-h vs CV) removed together with Sec. V-G: the per-case-oracle /
+    # threshold-predictability analysis is out of scope for this paper.
     print("F9 phase-2 qualitative"); fig_beta_qualitative()
 
     best = grid.loc[grid["u"].idxmax()]
