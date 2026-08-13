@@ -108,9 +108,13 @@ CLIP whole 從第 2 升到第 1。主張必須改寫,不能沿用「三項最佳
   「SSIM 與 CLIP-whole 全表第一,LPIPS 與 CLIP-edited 第二,ImageReward 第三 ——
   僅次於兩個 **12B** flow 模型,而我們只有 2B、單圖 2.5 秒」。
 
-  ⚠️ IR 第三是**輸給** ReFlex(0.7334)與 FlowEdit(0.7229),不是贏過它們。
-  我們 0.7098。文字要寫「僅次於」,寫成「贏過」是錯的。
-  真正的賣點是**參數量少 6 倍**還咬得這麼近。
+  IR 的正確說法(四個 flow baseline 全部是 12B):我們 0.7098 **贏過 RF-Inversion
+  (0.5484)與 FireFlow(−0.3778)**,**僅次於 ReFlex(0.7334)與 FlowEdit(0.7229)**。
+  全表排第 3 / 11。可用的兩種寫法:
+  - 「ImageReward 贏過四個 12B flow 基線中的兩個,僅次於另外兩個,而參數量少 6 倍」
+  - 「ImageReward 全表第三,僅次於兩個 12B flow 模型」
+
+  兩種都成立,前者較完整、後者較簡潔。不要寫成「贏過 ReFlex / FlowEdit」。
 
 - **加一段講兩個工作點**:preservation 列把 SSIM/LPIPS 兩項也拿下,PSNR 升到第 3。
   強調這是同一個方法沿 frontier 移動,不是換方法。
