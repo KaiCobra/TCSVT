@@ -3,8 +3,10 @@
 \caption{Ablation on attention-based masking. \emph{Scale-$N$}: the first $N$
 scales are replaced with source tokens and no attention mask is applied at any
 later scale. \emph{Attn Mask}: the full three-phase pipeline. S.D.\ is Structure
-Distance. \textbf{Bold} marks our configuration, as elsewhere in this paper;
-no per-column ranking is marked.}
+Distance. All rows are measured under one common configuration of the pipeline
+held fixed across the ablation, which is not the operating point reported in
+Table~\ref{tab:method_comparison_wo_kvedit}; the comparison between rows is
+unaffected. Nothing is marked.}
 \label{tab:ablation_mask}
 \centering
 \small
@@ -19,7 +21,7 @@ Scale-4 & 0.0611 & 14.08 & 0.4960 & 0.3190 & 0.2121 & 0.1946 \\
 Scale-6 & 0.0424 & 15.66 & 0.5530 & 0.2560 & 0.2001 & 0.1822 \\
 \midrule
 \rowcolor{gray!12}
-Attn Mask (ours) & \textbf{0.0316} & \textbf{23.44} & \textbf{0.8565} & \textbf{0.0833} & \textbf{0.2613} & \textbf{0.2290} \\
+Attn Mask (full pipeline) & 0.0316 & 23.44 & 0.8565 & 0.0833 & 0.2613 & 0.2290 \\
 \bottomrule
 \end{tabular}}
 \end{table}

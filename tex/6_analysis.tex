@@ -116,10 +116,17 @@ configuration; Fig.~\ref{fig:adaptive_frontier}(b,\,c) plots the same quantity
 for all 360 configurations. Both are offline estimates on the dev set (see the
 caveat at the end of Sec.~\ref{sec:protocol}), computed identically for the
 adaptive and the fixed arms so that the comparison between them is unaffected.
-At SSIM $0.856$ the adaptive threshold reaches ImgReward $0.734$
-against $\approx\!0.704$ for the interpolated fixed frontier, a gain of $+0.030$;
-measured against LPIPS instead of SSIM the gain is $+0.032$, so the conclusion
-does not depend on a single preservation metric. The leave-one-category-out consensus parameters give $+0.037$ under both.
+Direct runs of three adaptive configurations, compared against the fixed
+frontier interpolated at the SSIM each of them attains, give ImgReward gains of
+$+0.012$, $+0.012$ and $+0.006$. Each of these is inside the run-to-run noise
+band quoted above, so on the headline edit metric the adaptive term cannot be
+claimed to beat a fixed threshold. The smaller-variance metrics agree in sign
+across all three configurations --- HPSv2 $+0.0016$ to $+0.0021$, LPIPS
+$-0.0012$ to $-0.0018$, PSNR $+0.24$ to $+0.34$ --- which is consistent with a
+real but small effect. We therefore present the adaptive term as a refinement of
+the absolute-energy rule, not as a second control surface.
+% NOTE: the offline dev-set estimate previously quoted here (+0.030 / +0.037)
+% over-states the effect; see docs/reports/m15_scale_dependence/report.md.
 
 The adaptation is also real rather than nominal. Instrumenting a direct run and
 recording $\tau_k$ at every scale of every case gives a median of $0.581$ with

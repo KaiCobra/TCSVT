@@ -4,8 +4,11 @@
 \begin{table}[t]
 \centering
 \caption{Ablation on IQR block filtering. Removing the filter and averaging all
-blocks lets positional-bias-dominated attention corrupt the mask.
-\textbf{Bold} marks our configuration, as elsewhere in this paper.}
+blocks lets positional-bias-dominated attention corrupt the mask. Both rows are
+measured under one common configuration held fixed across the ablation, which is
+not the operating point reported in
+Table~\ref{tab:method_comparison_wo_kvedit}; the comparison between rows is
+unaffected. Nothing is marked.}
 \label{tab:ablation_iqr}
 \small
 \resizebox{\linewidth}{!}{%
@@ -14,7 +17,7 @@ blocks lets positional-bias-dominated attention corrupt the mask.
 Method & S.D.$\downarrow$ & PSNR$\uparrow$ & SSIM$\uparrow$ & LPIPS$\downarrow$ & CLIPw$\uparrow$ & CLIPe$\uparrow$ \\
 \midrule
 \rowcolor{gray!12}
-With IQR (ours) & \textbf{0.0316} & \textbf{23.44} & \textbf{0.8565} & \textbf{0.0833} & \textbf{0.2613} & \textbf{0.2290} \\
+With IQR & 0.0316 & 23.44 & 0.8565 & 0.0833 & 0.2613 & 0.2290 \\
 W/O IQR   & 0.0328 & 20.56 & 0.7872 & 0.1285 & 0.2550 & 0.2260 \\
 \bottomrule
 \end{tabular}%
