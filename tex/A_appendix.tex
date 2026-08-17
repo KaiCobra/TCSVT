@@ -81,11 +81,130 @@ by $\approx\!\pm 0.02$ ImageReward and $\approx\!\pm 0.001$ HPSv2 at $n{=}700$,
 and by $\approx\!\pm 0.05$ ImageReward for an individual $n{=}80$ category. We
 state this scale wherever a reported difference approaches it.
 
+\section{Per-Category Results}
+\label{app:category}
+
+\input{tabs/categoryScore}
+
+Table~\ref{tab:category_scores} breaks our reported configuration down over the
+ten PIE-Bench editing categories. All metrics follow the standard PIE-Bench
+protocol at $512\times512$, so they are directly comparable with the main table.
+Three regularities stand out.
+
+\noindent\textbf{Pixel-level preservation metrics} (PSNR, SSIM, LPIPS) are
+naturally strongest in categories that are spatially well localized and
+geometrically stable --- Change Material and Change Background, where the subject
+stays put --- and these two rank in the top two on all three. Change Pose and
+Change Object, which demand larger geometric or semantic change, score lower,
+consistent with the intrinsic difficulty of isolating the edited region in those
+scenarios.
+
+\noindent\textbf{Structure Distance behaves differently from the other three.} It
+is lowest on Change Style ($0.0210$), Add Object ($0.0231$) and Delete Object
+($0.0242$). The reason is that Structure Distance measures \textit{structural}
+similarity in DINO feature space rather than pixel fidelity: a style transfer
+changes the tone and texture of the whole frame --- hence the low PSNR --- while
+leaving the spatial arrangement of the scene almost intact. The divergence
+between the two families of metric is itself evidence that ``background
+preservation'' is not a single axis.
+
+\noindent\textbf{Editing-quality metrics} (CLIPe) peak on Change Style, showing
+that a global style edit is captured well by the CLIP embedding of the edited
+region. Delete Object has the lowest CLIPe, because the target region contains no
+concrete object for the similarity to measure.
+
+Overall the method is balanced across categories, and in particular stays
+competitive on SSIM and LPIPS in every one of them, which supports the claim that
+attention-driven masking is consistently effective across editing types.
+
 \section{Text-to-Image Editing Mode}
 \label{app:t2i}
 
-% TODO: move the T2I qualitative results here from the ACM supplementary
-% material, and describe the mask-mechanism validation performed in this mode.
+As described in Sec.~\ref{section:method}, the framework extends naturally to a
+text-to-image (T2I) editing mode by setting $I_s = \varnothing$, so that both the
+source and the target image are generated from prompts with no real image
+involved. The goal in this mode is to modify \textit{generated} content rather
+than to edit an existing photograph, which is directly analogous to the
+Prompt-to-Prompt setting in the diffusion literature.
+
+Because our masking mechanism operates on the cross-attention map between prompt
+tokens and visual tokens --- and that map exists whether the source image is a
+photograph or a generation --- the entire mask-construction pipeline (IQR
+filtering, absolute-energy binarization, dual-stream extraction) carries over
+\textit{without any modification}. The only difference is that Phase~1 generates
+the source image from $P_s$ instead of encoding a given photograph.
+
+Figs.~\ref{fig:p2p1}--\ref{fig:p2p3} show 45 T2I editing results spanning colour
+changes, material and style transfer, object replacement, attribute
+modification, expression and pose changes, and background replacement. Three
+points are worth noting:
+
+\begin{itemize}
+\item \textbf{Fine-grained semantic control.} The method handles precise edits
+such as a change of gaze direction (eyes down $\to$ forward), a change of facial
+expression (calm $\to$ laughing), and subtle material changes ($+$wooden,
+$+$bronze), indicating that the cross-attention maps of the VAR transformer carry
+enough spatial semantics for accurate localization.
+\item \textbf{Global and local edits.} Global edits such as style transfer
+($+$cartoon, $+$origami) and spatially localized edits such as recolouring a
+particular object are handled by the same pipeline with no mode switch, which
+demonstrates the generality of the attention-mask formulation.
+\item \textbf{Background preservation.} Even without a real source image to
+anchor to, the T2I mode still preserves the unedited regions of the generated
+source, confirming that discrete token replacement provides a robust structural
+prior.
+\end{itemize}
+
+These results confirm that the framework is not specific to real image editing;
+it also serves as a general prompt-driven editing tool for VAR-based generation.
+
+\begin{figure*}[p]
+    \centering
+    \includegraphics[width=\linewidth,height=0.87\textheight,keepaspectratio]{imgs/p2p_1.png}
+    \caption{Text-to-image (T2I) editing results (1/3). Each pair shows the
+    source image generated from $P_s$ (left) and the edited image generated from
+    $P_t$ (right), with no real image input. Editing types include colour change
+    (row 1: green$\to$brown, black$\to$golden, black$\to$silver), material change
+    (row 2: $+$wooden, $+$bronze, $+$full of flowers), environment change (row 3:
+    snow$\to$rain, fire$\to$lanterns, snow$\to$grass), spatial change (row 4:
+    branch$\to$rock, rice field$\to$wonder land, $+$cartoon) and style transfer
+    (row 5: $+$sketch, $+$kids crayon drawing). These results show that our
+    attention-based masking operates directly on the cross-attention map between
+    prompt tokens and visual tokens, with no real image and no inversion
+    procedure.}
+    \label{fig:p2p1}
+\end{figure*}
+
+\begin{figure*}[p]
+    \centering
+    \includegraphics[width=\linewidth,height=0.87\textheight,keepaspectratio]{imgs/p2p_2.png}
+    \caption{Text-to-image (T2I) editing results (2/3). Editing types include
+    object replacement (row 1: cat$\to$tiger, fruit$\to$candy,
+    spaceship$\to$eagle; row 2: dog$\to$wolf, star$\to$heart), accessory addition
+    (row 2: $+$wearing hat; row 3: $+$exaggerated hair band), breed change (row 3:
+    shepherd$\to$poodle dog), expression change (row 3: calm$\to$laughing), pose
+    adjustment (row 4: eyes looking down$\to$forward, looking left$\to$camera,
+    $+$head down) and colour change (row 5: purple$\to$orange, red$\to$purple,
+    white$\to$blue). Our method handles fine-grained semantic changes --- altering
+    a facial expression or a gaze direction --- which require modifying local
+    tokens while the global structure is preserved.}
+    \label{fig:p2p2}
+\end{figure*}
+
+\begin{figure*}[p]
+    \centering
+    \includegraphics[width=\linewidth,height=0.87\textheight,keepaspectratio]{imgs/p2p_3.png}
+    \caption{Text-to-image (T2I) editing results (3/3). Editing types include
+    colour change (row 1: orange$\to$black; row 2: gray$\to$white,
+    white$\to$golden; row 4: purple$\to$yellow, yellow$\to$red; row 5:
+    red$\to$blue), style transfer (row 1: $+$origami), object replacement (row 2:
+    surfboards$\to$flowers; row 4: flowers$\to$snakes; row 5: cat$\to$dog),
+    attribute change (row 3: opened$\to$closed, laughing$\to$angry) and background
+    replacement (row 3: grass$\to$rocks). The diversity of successful edits across
+    object, attribute, style and background categories confirms the generality of
+    the framework in the T2I setting.}
+    \label{fig:p2p3}
+\end{figure*}
 
 \section{Focus-Word Extraction: Failure Modes}
 \label{app:prompt}
@@ -107,5 +226,89 @@ state this scale wherever a reported difference approaches it.
 \section{Additional Qualitative Results}
 \label{app:qualitative}
 
-% TODO: 2-3 examples per editing category.  A journal appendix has the space and
-% this is the cheapest way to answer "evaluation scope is narrow".
+Figs.~\ref{fig:qualSupp1}--\ref{fig:qualSupp6} present 42 further qualitative
+comparisons covering all ten PIE-Bench categories, corroborating the consistency
+of our method across editing scenarios. The layout matches the qualitative
+comparison in the main text.
+
+\begin{figure*}[p]
+    \centering
+    \includegraphics[width=\linewidth]{imgs/qualSupp1.png}
+    \caption{Supplementary qualitative comparison on PIE-Bench (1/6). Editing
+    types: background addition (row 1: $+$castles), material change (row 2:
+    easter$\to$coppery), object replacement (rows 3--4: man$\to$robot,
+    chocolate$\to$ice cream), object addition (row 5: $+$pink flowers), object
+    removal (row 6: $-$elephant) and background change (row 7: black
+    forest$\to$wizard house). Our method (rightmost column) applies the edit
+    precisely while faithfully preserving the unedited regions.}
+    \label{fig:qualSupp1}
+\end{figure*}
+
+\begin{figure*}[p]
+    \centering
+    \includegraphics[width=\linewidth]{imgs/qualSupp2.png}
+    \caption{Supplementary qualitative comparison on PIE-Bench (2/6). Editing
+    types: object replacement (rows 1, 2, 5, 6: monkey$\to$man,
+    pears$\to$bananas, book$\to$painting, bulldog$\to$rat), style change (row 3:
+    $+$real photo), object addition (row 4: $+$flying butterfly) and attribute
+    modification (row 7: $+$flowers on hair). Row 1 requires replacing the object
+    (monkey$\to$man) while keeping the goggles intact; our method does this
+    cleanly, whereas several baselines either alter the goggles or fail to replace
+    the monkey.}
+    \label{fig:qualSupp2}
+\end{figure*}
+
+\begin{figure*}[p]
+    \centering
+    \includegraphics[width=\linewidth]{imgs/qualSupp3.png}
+    \caption{Supplementary qualitative comparison on PIE-Bench (3/6). Editing
+    types: colour change (row 1: red$\to$pink), attribute replacement (rows 2, 4:
+    smoke$\to$fire, jacket$\to$blouse), object replacement (row 3:
+    clods$\to$eggs), style transfer (rows 5, 7: $+$origami,
+    watercolor$\to$anime) and object addition (row 6: $+$flowers around). Row 7
+    shows a demanding global style transfer; our method converts the illustration
+    style while preserving the subject's pose and the spatial layout.}
+    \label{fig:qualSupp3}
+\end{figure*}
+
+\begin{figure*}[p]
+    \centering
+    \includegraphics[width=\linewidth]{imgs/qualSupp4.png}
+    \caption{Supplementary qualitative comparison on PIE-Bench (4/6). This figure
+    focuses on background and environment changes: style change (row 1: $+$stained
+    glass), background replacement (rows 2--6: fireplace$\to$garden,
+    room$\to$garden, branch$\to$rock, water$\to$grass, grass$\to$water) and object
+    addition (row 7: $+$flowers in mouth). Background edits are particularly
+    demanding because the subject must be left completely untouched; our
+    attention-based masking separates foreground subject from background region
+    across a wide range of scenes.}
+    \label{fig:qualSupp4}
+\end{figure*}
+
+\begin{figure*}[p]
+    \centering
+    \includegraphics[width=\linewidth]{imgs/qualSupp5.png}
+    \caption{Supplementary qualitative comparison on PIE-Bench (5/6). Editing
+    types: colour change (rows 1, 3, 5: black$\to$green, colorful$\to$red,
+    gold$\to$blue), compound attribute modification (row 2: $+$silver
+    $+$sculpture), object replacement (rows 4, 7: glowing jar$\to$crystal ball,
+    bread$\to$meat) and pose change (row 6: sitting$\to$standing). Row 6 is a
+    moderate pose change, which our method handles successfully, in contrast to
+    the drastic pose changes discussed in the limitation analysis
+    (Sec.~\ref{sec:limitations}).}
+    \label{fig:qualSupp5}
+\end{figure*}
+
+\begin{figure*}[p]
+    \centering
+    \includegraphics[width=\linewidth]{imgs/qualSupp6.png}
+    \caption{Supplementary qualitative comparison on PIE-Bench (6/6). Editing
+    types: attribute addition (row 1: $+$black and yellow stripes), object
+    replacement (rows 2, 3, 5, 6: shepherd$\to$poodle dog, monkey$\to$man,
+    plant$\to$flower, bulldog$\to$rat) and background change (rows 4, 7:
+    beach$\to$grass, white table$\to$black blanket). These examples span both
+    natural photographs and artificial illustrations, showing that our method
+    generalizes across image domains with no domain-specific adjustment.}
+    \label{fig:qualSupp6}
+\end{figure*}
+

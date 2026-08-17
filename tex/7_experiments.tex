@@ -8,7 +8,9 @@
 We evaluate on PIE-Bench~\cite{PIEBench}, a comprehensive benchmark comprising 700 images (both natural and artificial) across 10 editing categories, including object replacement, addition, removal, attribute modification, and style transfer.
 
 \noindent\textbf{Metrics.}
-Following prior work~\cite{PIEBench,AREdit}, we adopt six metrics grouped into two aspects. For \textit{background preservation}, we report Structure Distance~\cite{PIEBench} (S.D.), PSNR, SSIM, and LPIPS~\cite{LPIPS}. For \textit{editing quality}, we report CLIP similarity~\cite{CLIP} on both the whole image (CLIP whole) and the edited region (CLIP edited). We additionally report two preference models, HPSv2 and ImageReward, which we use throughout Sec.~\ref{sec:analysis}. All metrics are computed using the official PIE-Bench evaluation pipeline; Appendix~\ref{app:eval} documents the exact protocol, including the prompt convention used for scoring. Inference time per image is also reported.
+Following prior work~\cite{PIEBench,AREdit}, we adopt six metrics grouped into two aspects. For \textit{background preservation}, we report Structure Distance~\cite{PIEBench} (S.D.), PSNR, SSIM, and LPIPS~\cite{LPIPS}. For \textit{editing quality}, we report CLIP similarity~\cite{CLIP} on both the whole image (CLIP whole) and the edited region (CLIP edited). We additionally report two preference models, HPSv2 and ImageReward, which we use throughout Sec.~\ref{sec:analysis}. All metrics are computed using the official PIE-Bench evaluation pipeline; generation is performed at 1k resolution while every metric is computed at $512\times512$ under the standard PIE-Bench protocol. Inference time per image is also reported.
+
+Beyond these six official metrics we additionally measure two \textit{human-preference} models, HPS~v2.1~\cite{hpsv2} and ImageReward~\cite{imagereward}. They are not part of the PIE-Bench metric set; we report them because CLIP similarity measures only image--text alignment and is insensitive both to whether the edit was actually carried out and to whether the result agrees with human preference. One convention has to be stated explicitly: both preference metrics are always scored against the original \texttt{editing\_prompt} in the PIE-Bench \texttt{mapping\_file.json}, \textbf{never against a rewritten prompt}. This matters --- mixing the two conventions shifts ImageReward by as much as $0.33$, which is enough to invalidate any cross-method comparison. Appendix~\ref{app:eval} documents the full protocol.
 % TODO(bib): add HPSv2 and ImageReward entries to main.bib and cite them here.
 
 \noindent\textbf{Baselines.}
@@ -64,9 +66,7 @@ AREdit~\cite{AREdit} is the closest comparison: a training-free editor on the sa
 % to or better than AREdit; that row must come from a direct run under the SAME
 % configuration as the rest of Table I before it can be quoted.
 
-We report inference time for reference, but note that methods operate at different resolutions.
-% TODO(resolution): either re-run the baselines at a matched resolution or state
-% the resolution caveat explicitly in the caption of Table I.
+We report inference time for reference, but note that methods operate at different generation resolutions; all metrics are nevertheless computed at the common $512\times512$ evaluation resolution.
 
 \input{imgs/qualitative}
 

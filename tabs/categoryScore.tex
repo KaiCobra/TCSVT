@@ -1,0 +1,32 @@
+%% Translated from NTUST_Thesis_Kai/tabs/categoryScore.tex.
+%% Per-category breakdown of the reported configuration, all 700 PIE-Bench
+%% cases, scored under the standard protocol at 512x512.
+\begin{table}[t]
+\centering
+\caption{Per-category results of our method on PIE-Bench (700 images, 10 editing
+categories). PSNR$\uparrow$, SSIM$\uparrow$, LPIPS$\downarrow$: background
+preservation quality; StructDist$\downarrow$: structural fidelity;
+CLIPw$\uparrow$: CLIP similarity of the whole image to the target prompt;
+CLIPe$\uparrow$: CLIP similarity of the edited region to the target prompt.}
+\label{tab:category_scores}
+\footnotesize
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+Category & PSNR$\uparrow$ & SSIM$\uparrow$ & LPIPS$\downarrow$ & StructDist$\downarrow$ & CLIPw$\uparrow$ & CLIPe$\uparrow$ \\
+\midrule
+Random (140)            & 24.76 & 0.8664 & 0.0785 & 0.0338 & 0.2567 & 0.2330 \\
+Change Object (80)      & 22.68 & 0.8248 & 0.1093 & 0.0451 & 0.2622 & 0.2219 \\
+Add Object (80)         & 23.51 & 0.8732 & 0.0719 & 0.0231 & 0.2576 & 0.2361 \\
+Delete Object (80)      & 21.62 & 0.8351 & 0.0836 & 0.0242 & 0.2712 & 0.1883 \\
+Change Content (40)     & 21.79 & 0.8424 & 0.0991 & 0.0336 & 0.2622 & 0.2331 \\
+Change Pose (40)        & 19.83 & 0.8078 & 0.1123 & 0.0437 & 0.2711 & 0.2243 \\
+Change Color (40)       & 22.75 & 0.8398 & 0.1049 & 0.0424 & 0.2692 & 0.2234 \\
+Change Material (40)    & 26.64 & 0.9074 & 0.0561 & 0.0277 & 0.2585 & 0.2455 \\
+Change Background (80)  & 25.35 & 0.8990 & 0.0504 & 0.0305 & 0.2600 & 0.2331 \\
+Change Style (80)       & 21.37 & 0.8608 & 0.1100 & 0.0210 & 0.2558 & 0.2538 \\
+\midrule
+\textbf{Overall}        & \textbf{23.44} & \textbf{0.8565} & \textbf{0.0833} & \textbf{0.0316} & \textbf{0.2613} & \textbf{0.2290} \\
+\bottomrule
+\end{tabular}
+\end{table}

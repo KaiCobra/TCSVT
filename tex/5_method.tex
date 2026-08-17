@@ -89,7 +89,14 @@ At each generation scale, the editing pipeline executes three phases in sequence
 To identify which spatial regions correspond to the source semantics, we generate visual tokens at scale $k$ conditioned on the source prompt $P_s$, with the continuous source features injected at every scale so that the pass reconstructs $I_s$. From the resulting cross-attention, we apply IQR filtering and thresholding (Sec.~\ref{sec:mask_construction}--\ref{sec:threshold}) to obtain the source focus mask $M_{k,s}^{\mathrm{f}}$ and the preserve mask $M_{k,s}^{\mathrm{p}}$.
 
 \noindent\textbf{Phase~2: Target-Stream Mask Extraction.}
-Composition needs to know which regions the edit will affect before any token is replaced. Since the source-side mask alone cannot capture regions newly introduced by the target prompt, we perform a second generation pass conditioned on the target prompt $P_t$, anchoring positions where $M_{k,s}^{\mathrm{p}} = 1$ to source tokens $r_k^s$ to prevent background drift. From the resulting cross-attention, we extract the target focus mask $M_{k,t}^{\mathrm{f}}$ via the same filtering and thresholding procedure. The image generated in this pass is discarded; the mask is its only output.
+Composition needs to know which regions the edit will affect before any token is replaced. Since the source-side mask alone cannot capture regions newly introduced by the target prompt, we perform a second generation pass conditioned on the target prompt $P_t$, anchoring positions where $M_{k,s}^{\mathrm{p}} = 1$ to source tokens $r_k^s$ to prevent background drift. From the resulting cross-attention, we extract the target focus mask $M_{k,t}^{\mathrm{f}}$ via the same filtering and thresholding procedure, and mask it against the preserve mask,
+\begin{equation}
+    M_{k,t}^{\mathrm{f}} \leftarrow M_{k,t}^{\mathrm{f}} \wedge \neg M_{k,s}^{\mathrm{p}},
+    \label{eq:target_focus_gate}
+\end{equation}
+so that positions already identified as pure background are not pulled into the edited region by a residual target-side attention response.
+
+We stress that \textbf{every token produced by this pass is discarded, and $M_{k,t}^{\mathrm{f}}$ is its only output} --- no token from Phase~2 reaches the final image. This is the structural fact on which property~(iii) of Sec.~\ref{sec:threshold} rests.
 
 \noindent\textbf{Phase~3: Mask-Guided Token Composition.}
 Given the dual-stream masks, we compute the replacement mask $M_k^{\mathrm{rep}} = \neg(M_{k,s}^{\mathrm{f}} \cup M_{k,t}^{\mathrm{f}})$, which marks background positions for source token substitution. We generate the target tokens $g_k$ freely under $P_t$, then assemble the final output:
