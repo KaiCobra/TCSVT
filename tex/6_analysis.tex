@@ -102,6 +102,13 @@ smooth, any competing configuration can be compared against it fairly --- one
 asks not whether a variant is better, but whether it lies \emph{above} the
 frontier. We use this test repeatedly below.
 
+Two properties of the composition rule are fixed once and for all by this test
+and are not revisited later. Replacement is strictly binary rather than sampled
+from a cumulative probability field accumulated over scales, and the first
+$N{=}2$ scales are anchored to source tokens explicitly rather than implicitly;
+measured on the same frontier, the two together buy $+1.66$\,dB PSNR and
+$-0.013$ LPIPS at unchanged edit strength.
+
 \subsection{The Adaptive Term Shifts the Frontier Outward}
 \label{sec:adaptive_gain}
 
@@ -213,74 +220,3 @@ configurations relative to one another; every number reported outside this
 subsection comes from a direct run.
 % TODO(rerun): confirm the selected parameters with a direct full-benchmark run
 % (scripts/exp_m15_param_consensus.sh) before submission.
-
-\subsection{Phase 2 Contributes Structurally, Not Parametrically}
-\label{sec:beta}
-
-\input{tabs/ablationBeta}
-\input{imgs/fig_beta_frontier}
-\input{imgs/fig_beta_category}
-\input{imgs/fig_beta_qualitative}
-
-Phase~2 exists to answer a question the source image cannot: which regions the
-\emph{target} prompt will need, including regions that contain nothing relevant
-in the source. Table~\ref{tab:ablation_phase2}(a) removes it at three working
-points, and Fig.~\ref{fig:beta_frontier} plots the two resulting curves. Read
-row by row, the result looks like a straightforward trade: every
-preservation metric improves and every edit metric degrades. Read as curves, it
-is not a trade at all. At matched preservation --- the ablated pipeline at
-$h{=}0.52$ reaches PSNR $23.75$, the full pipeline at $h{=}0.60$ reaches
-$23.66$ --- the full pipeline still leads by $0.08$ ImgReward. The two frontiers
-do not intersect anywhere in the overlapping range: any operating point the
-ablated variant can reach, the full pipeline reaches as well and better by
-raising $h$. The effect size is also stable across working points
-($\Delta\mathrm{IR} \in [-0.32, -0.29]$, $\Delta\mathrm{PSNR} \in [+2.1, +2.3]$),
-which rules out a coincidence at a particular $h$.
-
-The per-category breakdown in Table~\ref{tab:ablation_phase2}(b) and
-Fig.~\ref{fig:beta_category} contains its own control. \texttt{delete\_object} is the one category in which the target needs no
-new region: the source focus mask already covers the object to be removed. Its
-$\Delta\mathrm{IR} = -0.018$ falls inside the noise band, confirming that the
-losses elsewhere are not a systematic artifact of the ablated code path. The
-three largest losses --- style transfer, object addition, background replacement
---- are exactly the categories whose target content must grow outside the source
-focus region. The $+7.60$\,dB PSNR ``improvement'' on style transfer is the clearest
-symptom: without a target-side mask the output is nearly identical to the source,
-so preservation is excellent and the edit simply did not happen.
-Fig.~\ref{fig:beta_qualitative} shows both failure modes directly.
-
-\noindent\textbf{Why the preserve level is inert.}
-Table~\ref{tab:anchoring}(b) sweeps $\ell$ over ten values at three fixed $h$.
-The total range of every metric is smaller than one $0.02$ step of $h$ by more
-than an order of magnitude, with no direction of improvement. The reason is
-structural rather than empirical: $\ell$ only widens or narrows the region that
-Phase~2 anchors to source tokens, and the tokens Phase~2 generates are discarded.
-Its influence on the output is confined to whether the target-side attention
-peaks cross $\tau_k$, and those peaks are far above $\ell$. We therefore do not
-treat $\ell$ as a hyperparameter.
-
-\subsection{Composition Rule and Coarse Anchoring}
-\label{sec:anchoring}
-
-\input{tabs/anchoring}
-\input{imgs/fig_anchoring}
-
-Table~\ref{tab:anchoring}(a) and Fig.~\ref{fig:anchoring} compare three ways of combining source and
-generated tokens at $h{=}0.60$. Converting the per-scale binary masks into a
-cumulative probability field --- averaging all masks from scale $0$ up to the
-current one and sampling replacement from the result --- is a form of anchoring,
-but an implicit and biased one: coarse scales are almost fully replaced, so their
-masks inflate the replacement probability at every finer scale, and positions
-inside the focus union can be overwritten by source content. Removing it without
-replacing it is worse still, because the coarse scales then carry no anchor at
-all. Strictly binary composition together with an explicit $N{=}2$ buys
-$+1.66$\,dB PSNR and $-0.013$ LPIPS over the cumulative variant at essentially
-unchanged edit strength ($0.550$ vs.\ $0.555$ ImageReward, inside the noise
-band); the cumulative variant retains a marginally lower Structure Distance
-($0.0329$ vs.\ $0.0331$), the one preservation metric on which the two are
-level.
-
-Making the anchoring explicit also makes its cost legible. $N$ is a genuine
-limitation rather than a hidden default: the first scales fix the global layout,
-so edits that require a fundamentally different spatial arrangement cannot be
-expressed however the masks are set. Sec.~\ref{sec:limitations} returns to this.

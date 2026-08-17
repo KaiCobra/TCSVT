@@ -28,9 +28,9 @@ The tokens substituted in Phase~3 are always the BSQ quantization of the source
 image, obtained once before generation begins. The tokens produced by Phase~1 are
 overwritten before Phase~3, and the tokens produced by Phase~2 are discarded.
 Phase~2 therefore influences the output through exactly one channel, the target
-focus mask --- which is the reason the preserve level $\ell$ is inert
-(Sec.~\ref{sec:beta}) and the reason removing Phase~2 altogether has a large
-effect.
+focus mask --- which is the reason the preserve level $\ell$ is inert and the
+reason removing Phase~2 altogether has a large effect
+(Sec.~\ref{sec:ablation_phase2}).
 
 \noindent\textbf{Mask polarity and granularity.}
 Storage masks are \emph{replacement} masks, not protection masks: a true entry

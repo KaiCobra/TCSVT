@@ -58,7 +58,7 @@ Three properties of this formulation are worth making explicit.
 
 \textit{(ii) The focus mask can be empty.} Because the criterion is an absolute energy level rather than a rank, an attention map with no region above $\tau_k$ produces no focus mask, and the corresponding scale is left entirely to source tokens. This is the behaviour a rank-based rule cannot express.
 
-\textit{(iii) The preserve level $\ell$ is not a tuned hyperparameter.} The preserve mask is consumed only by Phase~2, where it anchors background positions to source tokens while the target-side attention is recorded; the tokens generated in that pass are discarded (Sec.~\ref{sec:pipeline}). Consequently $\ell$ influences the final output only through whether the target attention peaks cross $\tau_k$, which it does not affect. We set $\ell = h - 0.01$ throughout and verify in Sec.~\ref{sec:beta} that the choice is inconsequential.
+\textit{(iii) The preserve level $\ell$ is not a tuned hyperparameter.} The preserve mask is consumed only by Phase~2, where it anchors background positions to source tokens while the target-side attention is recorded; the tokens generated in that pass are discarded (Sec.~\ref{sec:pipeline}). Consequently $\ell$ influences the final output only through whether the target attention peaks cross $\tau_k$, which it does not affect. We set $\ell = h - 0.01$ throughout.
 
 The parameters $(h, c_{\max}, \kappa_{\max})$ are not hand-tuned; Sec.~\ref{sec:protocol} describes the four-stage protocol used to derive them and reports their sensitivity.
 % TODO(verify): confirm against the CLI log of the result directory behind Table I.
@@ -81,7 +81,7 @@ Given the dual-stream masks, we compute the replacement mask $M_k^{\mathrm{rep}}
 Substitution operates on the bitwise token index $r_k \in \{0,1\}^{h_k \times w_k \times d}$, so composition is exact at the bit level and the replaced positions decode to the source content without residual error.
 
 \noindent\textbf{Explicit coarse-scale anchoring.}
-For the first $N$ coarse scales, all tokens are replaced with source tokens $r_k^s$ regardless of the masks, because these scales encode the low-frequency global layout. This anchoring is an explicit design choice with a measured alternative. A common implicit variant converts the per-scale binary masks into a cumulative probability field, i.e., replacing each position with a probability given by the average of all masks from scale $0$ to $k$; because coarse scales are almost fully replaced, this systematically inflates the replacement probability at fine scales and turns the composition into a biased stochastic anchoring. Replacing it with strictly binary composition plus an explicit $N$ gives uniformly better results, and $N$ itself trades background fidelity against layout freedom; we use $N=2$ throughout. Sec.~\ref{sec:anchoring} reports both comparisons.
+For the first $N$ coarse scales, all tokens are replaced with source tokens $r_k^s$ regardless of the masks, because these scales encode the low-frequency global layout. Replacement is strictly binary and the anchoring is explicit rather than folded into a cumulative probability field accumulated over scales, which would inflate the replacement probability at the fine scales and turn the composition into a biased stochastic anchoring. $N$ trades background fidelity against layout freedom; we use $N=2$ throughout.
 
 The complete procedure is summarized in Algorithm~\ref{alg:editing}.
 

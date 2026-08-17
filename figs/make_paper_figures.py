@@ -523,15 +523,13 @@ def main():
 
     print("F3 adaptive frontier")
     paper, cons, _ = fig_adaptive_frontier(sim_dev, grid)
+    # F5-F7, F9 removed: the Phase-2 frontier / per-category / qualitative figures
+    # and the anchoring figure went with Sec. V-E and V-F.
     print("F4 protocol (+ 9 leave-one-category-out searches)")
     consensus, flat = fig_protocol(sim_dev, grid, cvs, kms)
 
-    print("F5 phase-2 frontier");   fig_beta(arms, nob)
-    print("F6 phase-2 categories"); fig_beta_category(arms, nob)
-    print("F7 anchoring");          fig_anchoring()
     # F8 (best-h vs CV) removed together with Sec. V-G: the per-case-oracle /
     # threshold-predictability analysis is out of scope for this paper.
-    print("F9 phase-2 qualitative"); fig_beta_qualitative()
 
     best = grid.loc[grid["u"].idxmax()]
     print("\n--- numbers to cross-check against the manuscript ---")

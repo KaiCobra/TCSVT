@@ -76,7 +76,26 @@ The most basic alternative to a spatial mask is no spatial mask at all: share th
 
 As shown in Table~\ref{tab:ablation_mask}, increasing the number of shared scales progressively improves preservation, but the gains saturate: even at $N{=}6$ --- nearly half of the 13 scales --- SSIM reaches only $0.553$, because every scale beyond $N$ generates with no reference to the source. Per-token spatial guidance at every scale improves SSIM by 55\% and LPIPS by 67.5\% over the best Scale-$N$ variant.
 
-Fig.~\ref{fig:shape_diff} explains why the saturation is structural rather than a matter of choosing $N$ better. Fig.~\ref{fig:shape_diff_a} shows the two failure modes at the ends of the range: few shared scales permit the edit but destroy the background, while many shared scales preserve the background and simultaneously lock the subject, since the global layout is already committed. Fig.~\ref{fig:shape_diff_b} shows the underlying cause --- VAR fixes the global arrangement within the first few scales and spends the remainder on texture --- so a shape-changing edit must modify early tokens, which uniform scale-level replacement cannot do selectively. Attention masking resolves the tension by replacing only background positions at every scale, which is what makes precise editing and faithful preservation simultaneously attainable. The residual cost of the coarse anchoring that remains is analyzed in Sec.~\ref{sec:anchoring} and its limits in Sec.~\ref{sec:limitations}.
+Fig.~\ref{fig:shape_diff} explains why the saturation is structural rather than a matter of choosing $N$ better. Fig.~\ref{fig:shape_diff_a} shows the two failure modes at the ends of the range: few shared scales permit the edit but destroy the background, while many shared scales preserve the background and simultaneously lock the subject, since the global layout is already committed. Fig.~\ref{fig:shape_diff_b} shows the underlying cause --- VAR fixes the global arrangement within the first few scales and spends the remainder on texture --- so a shape-changing edit must modify early tokens, which uniform scale-level replacement cannot do selectively. Attention masking resolves the tension by replacing only background positions at every scale, which is what makes precise editing and faithful preservation simultaneously attainable. The residual cost of the coarse anchoring that remains is analyzed in Sec.~\ref{sec:limitations}.
+
+\subsection{Phase 2}
+\label{sec:ablation_phase2}
+
+Phase~2 performs a second generation pass under the target prompt in order to
+extract the target focus mask $M_{k,t}^{\mathrm{f}}$ before any token is replaced
+(Sec.~\ref{sec:pipeline}). We compare the full three-phase pipeline against a
+variant that skips Phase~2 entirely.
+
+\input{tabs/ablationPhase2}
+
+As shown in Table~\ref{tab:ablation_phase2}, Phase~2 is the single largest
+contribution of any component: PSNR improves by $37.7\%$, SSIM by $37.5\%$,
+LPIPS drops by $59.3\%$ and Structure Distance by $39.0\%$, with the CLIP scores
+also rising by $3.5$--$3.6\%$. These results confirm that a source-side mask alone
+cannot delineate the edit boundary accurately --- least of all when the target
+introduces spatial content that does not exist in the source. The dual-stream
+mask construction of Phases~1--2 is therefore indispensable for achieving precise
+edits without background drift.
 
 \subsection{IQR Filtering}
 \label{sec:ablation_iqr}

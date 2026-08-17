@@ -1,0 +1,20 @@
+%% Translated from NTUST_Thesis_Kai/tabs/ablationPhase2.tex.
+%% Simple two-arm ablation: the full three-phase pipeline versus the same
+%% pipeline with Phase 2 skipped entirely.
+%% Convention: best in bold (two rows only, so no second-best mark).
+\begin{table}[t]
+\centering
+\caption{Ablation of Phase~2. \textbf{Bold} is the best.}
+\label{tab:ablation_phase2}
+\small
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{l|cccc|cc}
+\toprule
+Method & S.D.$\downarrow$ & PSNR$\uparrow$ & SSIM$\uparrow$ & LPIPS$\downarrow$ & CLIPw$\uparrow$ & CLIPe$\uparrow$ \\
+\midrule
+With Phase 2 & \textbf{0.0316} & \textbf{23.44} & \textbf{0.8565} & \textbf{0.0833} & \textbf{0.2613} & \textbf{0.2290} \\
+W/O Phase 2  & 0.0518 & 17.02 & 0.6228 & 0.2047 & 0.2522 & 0.2212 \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}

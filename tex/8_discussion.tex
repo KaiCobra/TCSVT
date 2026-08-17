@@ -5,8 +5,8 @@
 
 The clearest limitation of the framework is inherited from the property that
 makes it work. VAR commits to the global spatial arrangement within its first few
-scales, and Sec.~\ref{sec:anchoring} shows that anchoring those scales to the
-source is what keeps the background stable; the same anchoring necessarily
+scales, and anchoring those scales to the source is what keeps the background
+stable (Sec.~\ref{sec:frontier}); the same anchoring necessarily
 prevents an edit from rearranging the layout. The framework is therefore
 well-suited to edits that keep the global composition --- replacement,
 insertion, removal, attribute and style changes, and moderate pose adjustment ---
@@ -18,7 +18,7 @@ than a fixed rule. $N$ can be reduced, and Table~\ref{tab:ablation_mask} togethe
 with Fig.~\ref{fig:shape_diff} quantifies what is bought and lost at each
 setting: at small $N$ the layout is free but the background degrades, at large
 $N$ the background is preserved and the subject is locked. Removing the anchoring
-entirely is strictly worse than keeping it (Table~\ref{tab:anchoring}(a)). What
+entirely is strictly worse than keeping it. What
 the present formulation cannot do is make that choice per region --- freeing the
 layout where the edit needs it while anchoring it elsewhere --- because the
 coarse scales carry too few tokens for a spatial mask to be meaningful. A
