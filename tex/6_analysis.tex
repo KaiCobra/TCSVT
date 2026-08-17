@@ -50,10 +50,11 @@ times it.
 \subsection{The Statistics Behind the Threshold}
 \label{sec:cv_analysis}
 
-Sec.~\ref{sec:threshold} motivated the absolute-energy criterion by the claim
-that the coefficient of variation $c_k$ is driven by the mean rather than the
-spread of the attention map. We verify this directly on the last generation
-scale ($64\times64$), where the operative masks are built.
+Sec.~\ref{sec:threshold} states that the coefficient of variation $c_k$ varies
+across editing tasks through its mean rather than its spread. We measure this
+directly on the last generation scale ($64\times64$), where the operative masks
+are built, since it determines the scale on which the threshold has to be
+expressed.
 
 Fig.~\ref{fig:cv_decomposition} makes the decomposition explicit.
 Across the ten editing categories, the median $c_k$ spans a factor of $4.8$, from $0.31$ for object replacement down to $\approx\!0.067$ for object
@@ -69,17 +70,18 @@ attention concentrates on a few positions and the rest of the map approaches
 zero, so $\mu_k$ falls and $c_k$ rises; when the focus is a style or a material,
 attention spreads over the whole image and $\mu_k$ rises.
 
-This has a direct consequence for a threshold of the form $\mu_k + \kappa
-\sigma_k$. Because $\sigma_k \approx \mu_k / 10$ across the benchmark, changing
-$\kappa$ over a wide range barely moves the threshold: reducing the mapping from
-$\kappa \in [0.5, 1.5]$ to $\kappa \in [0.1, 0.5]$ shifts the median threshold by
-only $-9.5\%$. Yet because attention mass is dense just above $\mu_k$, the
-induced focus coverage nearly doubles, from $19.4\%$ to $37.9\%$ of the image.
-The threshold is thus almost entirely determined by $\mu_k$ --- a per-instance
-scale factor that has nothing to do with how selective the mask should be ---
-while being extremely sensitive in its effect. Normalizing the map and
-thresholding an absolute level (Eq.~\ref{eq:normalize}--\ref{eq:tau}) removes the
-$\mu_k$ dependence, which is the entire purpose of the reformulation.
+Two further measurements fix how the threshold must be built. First, the two
+moments are tightly coupled: $\sigma_k \approx \mu_k/10$ across the benchmark, so
+the spread carries little information that the mean does not already carry.
+Second, the attention mass is dense immediately above $\mu_k$, which makes the
+region near the mean the most sensitive place to put a cut --- moving the
+threshold there by $-9.5\%$ almost doubles the induced focus coverage, from
+$19.4\%$ to $37.9\%$ of the image. A cut placed on the raw map therefore lands in
+the steepest part of the distribution at a position set by $\mu_k$, which
+Fig.~\ref{fig:cv_decomposition} shows to be a proxy for the size of the focus
+region. Min--max normalizing the map and cutting at an absolute level
+(Eq.~\ref{eq:normalize}--\ref{eq:tau}) puts the threshold on a scale that is
+common to every instance, which is the purpose of the reformulation.
 
 \input{imgs/fig_cv_decomposition}
 
@@ -102,14 +104,13 @@ smooth, any competing configuration can be compared against it fairly --- one
 asks not whether a variant is better, but whether it lies \emph{above} the
 frontier. We use this test repeatedly below.
 
-Two properties of the composition rule are fixed once and for all by this test
-and are not revisited later. Replacement is strictly binary rather than sampled
-from a cumulative probability field accumulated over scales, and the first
-$N{=}2$ scales are anchored to source tokens explicitly rather than implicitly;
-measured on the same frontier, the two together buy $+1.66$\,dB PSNR and
-$-0.013$ LPIPS at unchanged edit strength.
+Two properties of the composition rule are fixed once and for all by this
+measurement and are not revisited later: replacement is strictly binary, and the
+first $N{=}2$ scales are anchored to source tokens. Together they are worth
+$+1.66$\,dB PSNR and $-0.013$ LPIPS on this frontier at unchanged edit
+strength.
 
-\subsection{The Adaptive Term Shifts the Frontier Outward}
+\subsection{What the Adaptive Term Is Worth}
 \label{sec:adaptive_gain}
 
 \input{tabs/adaptiveGain}

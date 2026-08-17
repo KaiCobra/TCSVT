@@ -34,11 +34,27 @@ In practice, approximately 10--20\% of blocks are filtered per scale, yielding s
 
 The filtered map $\hat{a}_k$ must be binarized into a focus mask (regions the edit may rewrite) and a preserve mask (background used to anchor source content). This subsection derives the binarization rule, which is the component that most directly controls the preservation--edit trade-off.
 
-\noindent\textbf{Why rank-based thresholds are structurally inadequate.}
-A natural first choice is a rank-based rule: take the $p$-th percentile of $\hat{a}_k$ as the threshold. Such a rule, however, \textit{always} selects the top $(1-p)$ fraction of spatial positions, even when the map contains no salient high-energy region at all. This is not a tuning issue but a structural one: for edits such as object addition or global style transfer, the source prompt has no corresponding focus region in the source image, and the correct focus mask may legitimately be empty or near-empty. A rank-based rule cannot express this.
+\noindent\textbf{What the attention statistics encode.}
+Two quantities are available from $\hat{a}_k$: its rank structure and its moments.
+Measured over the full benchmark, the coefficient of variation
+$c_k = \sigma_k/\mu_k$ varies across editing categories almost entirely through
+its \emph{denominator} --- the median $\sigma_k$ spans less than a factor of two
+while the median $\mu_k$ spans more than a factor of three, in the opposite
+direction (Sec.~\ref{sec:cv_analysis}). What $c_k$ carries is therefore
+\textit{how large a fraction of the image the focus region occupies}: when the
+focus word denotes a small, well-localized object, attention concentrates on a
+few positions, the rest of the map approaches zero, and $\mu_k$ falls. The mean
+is thus a per-instance scale factor that reflects the size of the focus region
+rather than how selective the mask should be, and a threshold expressed relative
+to it inherits that dependence. The rank structure carries a different
+constraint: a criterion stated as a percentile fixes the selected fraction in
+advance, whereas for edits such as object addition or global style transfer the
+source image contains no corresponding focus region and the correct focus mask
+is legitimately empty.
 
-\noindent\textbf{What the attention statistics actually encode.}
-A second natural choice is a moment-based threshold $\tau_k = \mu_k + \kappa \sigma_k$, where $\mu_k, \sigma_k$ are the mean and standard deviation of $\hat{a}_k$ and $\kappa$ is modulated by the coefficient of variation $c_k = \sigma_k / \mu_k$ so that concentrated attention yields a tighter mask. Measuring these statistics over the full benchmark, however, reveals that the between-task variation of $c_k$ is driven almost entirely by the \emph{denominator}: across ten editing categories the median $\sigma_k$ spans less than a factor of two, whereas the median $\mu_k$ spans more than a factor of three, in the direction opposite to $c_k$ (Sec.~\ref{sec:cv_analysis}). In other words, $c_k$ is effectively a measure of \textit{how large a fraction of the image the focus region occupies}, and $\mu_k$ --- not the distribution shape --- dominates the absolute scale of $\mu_k + \kappa \sigma_k$. This produces exactly the wrong behaviour in the case that matters most: when the focus word corresponds to a small, well-localized object, attention concentrates on a few positions and the remaining background drags $\mu_k$ down, so $\tau_k$ falls and the resulting mask becomes \emph{larger}.
+Both observations point the same way. The threshold should be stated as an
+absolute level on a scale that is fixed across instances, and it should be free
+to select nothing.
 
 \noindent\textbf{Absolute-energy threshold with a CV-adaptive correction.}
 We therefore decouple the threshold from $\mu_k$ by min-max normalizing the filtered map,
@@ -56,7 +72,7 @@ Three properties of this formulation are worth making explicit.
 
 \textit{(i) $h$ remains the single semantically meaningful knob.} We fix $\kappa_{\min} = 0$ by construction, so $\tau_k \ge h$ always holds: the adaptive term can only \emph{tighten} the mask relative to the base level, never loosen it. Sweeping $h$ traces a smooth, monotone preservation--edit frontier (Sec.~\ref{sec:frontier}), and the adaptive term shifts that frontier outward rather than adding a second, competing degree of freedom.
 
-\textit{(ii) The focus mask can be empty.} Because the criterion is an absolute energy level rather than a rank, an attention map with no region above $\tau_k$ produces no focus mask, and the corresponding scale is left entirely to source tokens. This is the behaviour a rank-based rule cannot express.
+\textit{(ii) The focus mask can be empty.} Because the criterion is an absolute energy level rather than a rank, an attention map with no region above $\tau_k$ produces no focus mask, and the corresponding scale is left entirely to source tokens. An edit whose target content has no counterpart in the source therefore leaves the source untouched at that scale by construction.
 
 \textit{(iii) The preserve level $\ell$ is not a tuned hyperparameter.} The preserve mask is consumed only by Phase~2, where it anchors background positions to source tokens while the target-side attention is recorded; the tokens generated in that pass are discarded (Sec.~\ref{sec:pipeline}). Consequently $\ell$ influences the final output only through whether the target attention peaks cross $\tau_k$, which it does not affect. We set $\ell = h - 0.01$ throughout.
 
