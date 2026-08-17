@@ -27,16 +27,16 @@ what actually moves the result and what does not.
 
 \noindent\textbf{Scope of the numbers in this section.}
 This section is a controlled comparison, not a second report of our headline
-result. Every row here is produced under one common recipe held fixed across the
-whole section, and each experiment varies exactly one component of it, so that
-rows within the section are comparable to one another and differences can be
-attributed. That recipe is deliberately not the configuration of
+result. Every row here is produced under one fixed recipe --- minimal prompt
+rewriting, binary composition, $N{=}2$, all 700 PIE-Bench cases, seed 1 --- and
+each experiment varies exactly one component of it, so rows within the section
+are comparable to one another and any difference can be attributed to the
+component that was varied. That recipe is deliberately not the configuration of
 Table~\ref{tab:method_comparison_wo_kvedit}, which is the single configuration we
 report as our method and the only place the reader should read our scores from.
-Consequently the absolute values below are not directly comparable to
+The absolute values below are therefore not directly comparable to
 Table~\ref{tab:method_comparison_wo_kvedit}; only the differences within this
-section are. Where a subsection additionally relies on an offline estimate rather
-than a direct run, this is stated at that point.
+section are.
 
 \noindent\textbf{Noise scale.}
 Generation is not bit-exact (bf16 kernels with fused attention), so identical
@@ -110,114 +110,77 @@ first $N{=}2$ scales are anchored to source tokens. Together they are worth
 $+1.66$\,dB PSNR and $-0.013$ LPIPS on this frontier at unchanged edit
 strength.
 
-\subsection{What the Adaptive Term Is Worth}
-\label{sec:adaptive_gain}
+\subsection{Three-Step Calibration: How the Parameters Were Obtained}
+\label{sec:calibration}
 
-\input{tabs/adaptiveGain}
-\input{imgs/fig_adaptive_frontier}
+\input{tabs/cvPercentile}
 
-A per-instance threshold is only worth its complexity if it beats every fixed
-threshold at the same preservation level. Table~\ref{tab:adaptive_gain} performs
-that comparison by interpolating the fixed-threshold frontier of
-Table~\ref{tab:frontier_h} at the preservation level attained by the adaptive
-configuration; Fig.~\ref{fig:adaptive_frontier}(b,\,c) plots the same quantity
-for all 360 configurations. Both are offline estimates on the dev set (see the
-caveat at the end of Sec.~\ref{sec:protocol}), computed identically for the
-adaptive and the fixed arms so that the comparison between them is unaffected.
-Direct runs of three adaptive configurations, compared against the fixed
-frontier interpolated at the SSIM each of them attains, give ImgReward gains of
-$+0.012$, $+0.012$ and $+0.006$. Each of these is inside the run-to-run noise
-band quoted above, so on the headline edit metric the adaptive term cannot be
-claimed to beat a fixed threshold. The smaller-variance metrics agree in sign
-across all three configurations --- HPSv2 $+0.0016$ to $+0.0021$, LPIPS
-$-0.0012$ to $-0.0018$, PSNR $+0.24$ to $+0.34$ --- which is consistent with a
-real but small effect. We therefore present the adaptive term as a refinement of
-the absolute-energy rule, not as a second control surface.
-% NOTE: the offline dev-set estimate previously quoted here (+0.030 / +0.037)
-% over-states the effect; see docs/reports/m15_scale_dependence/report.md.
+The parameters $(h, c_{\max}, \kappa_{\max})$ are neither hand-tuned nor
+grid-searched. We calibrate them in three steps, each tied to a quantity that can
+be checked independently: the operating point, the clamp rate, and the median of
+the threshold that is actually realized.
 
-The adaptation is also real rather than nominal. Instrumenting a direct run and
-recording $\tau_k$ at every scale of every case gives a median of $0.581$ with
-interquartile range $[0.549, 0.621]$, spanning most of the usable range of
-Table~\ref{tab:frontier_h}. A configuration that merely reproduced a single fixed
-threshold under a more complicated formula would show a degenerate distribution
-here; this one does not.
+\noindent\textit{Step 1: $h$ is read off the frontier, not tuned.}
+Table~\ref{tab:frontier_h} is a measured curve, so choosing an operating point is
+the same as choosing a target threshold $\tau_{\mathrm{target}}$ on it. We take
+the balanced point $\tau_{\mathrm{target}} \approx 0.54$. Since
+$\kappa_{\min} = 0$ guarantees $\tau_k \ge h$ by construction, $h$ is the lower
+bound of $\tau_k$, and we set $h = 0.50$ as the base.
 
-The same instrumentation exposes a property of Eq.~\ref{eq:tau} that the
-formulation makes easy to overlook: $\tilde{\sigma}_k$ is computed from the
-normalized map \emph{at scale $k$}, and it is strongly scale-dependent. Its median
-falls monotonically from $0.299$ at the second scale to $0.139$ at the last, so
-the same $\kappa$ produces a bump at the coarse scales more than twice the size
-of the one it produces at the finest. Because $c_k$ is likewise larger at coarse
-scales, $\kappa$ saturates at $\kappa_{\max}$ for $24$--$41\%$ of cases
-depending on depth. The threshold is therefore tightest exactly where the layout
-is decided, and the induced focus coverage falls from $25\%$ at the second scale
-to $5.8\%$ at the last. Any calibration of $(c_{\max}, \kappa_{\max})$ that is
-performed on the statistics of a single scale will not transfer to the multi-scale
-run; Sec.~\ref{sec:protocol} returns to this.
-% TODO(protocol): the four-stage selection below is calibrated on last-scale
-% statistics only (sigma_norm ~ 0.138), whereas the run applies the rule at every
-% scale (sigma_norm median 0.190).  The selected kappa_max is therefore ~1.4x too
-% large in effect.  See docs/reports/m15_scale_dependence/report.md.
+\noindent\textit{Step 2: $c_{\max}$ follows from the per-scale CV distribution.}
+The criterion is that $c_{\max}$ be high enough for the mapping of
+Eq.~\ref{eq:kappa} to stay discriminative over the large majority of (case,
+scale) pairs; if $c_{\max}$ is too low, a large fraction is clamped at
+$\kappa_{\max}$ and the mapping stops distinguishing anything.
+Table~\ref{tab:cv_percentile} lists the quantiles of $c_k$ over \emph{all}
+generation scales ($n = 14245$). We take $c_{\max} = 0.33$, about the 88th
+percentile, so only about $12\%$ of pairs are clamped.
 
-\subsection{How the Parameters Were Obtained}
-\label{sec:protocol}
+\noindent\textit{Step 3: $\kappa_{\max}$ is calibrated, not searched.}
+The requirement is simply that the median of the realized threshold land on the
+operating point chosen in Step~1. Let
+\begin{equation}
+    m = \operatorname{median}\!\Bigl(\operatorname{clamp}\bigl(c_k/c_{\max},\,0,\,1\bigr)
+    \cdot \tilde{\sigma}_k\Bigr),
+    \label{eq:calib}
+\end{equation}
+measured as $m = 0.086$. Then
+$\kappa_{\max} = (\tau_{\mathrm{target}} - h)/m = (0.54 - 0.50)/0.086 \approx 0.47$.
+We use $\kappa_{\max} = 0.43$, for which the measured median $\tau_k$ is $0.537$
+against the target $0.540$ --- an error of $0.003$.
 
-\input{tabs/protocol}
-\input{imgs/fig_protocol}
+\noindent\textbf{Why per-scale statistics are required.}
+Step~3 hides a detail that decides whether the calibration works at all:
+$\tilde{\sigma}_k$ is computed \emph{separately at each scale}, and it falls
+monotonically with depth --- its median goes from $0.299$ at the second scale to
+$0.139$ at the last, a factor of $2.15$. The coefficient of variation $c_k$ is
+likewise larger at the coarse scales, so $\kappa$ saturates at $\kappa_{\max}$
+for $24$--$41\%$ of cases depending on depth, and the induced focus coverage
+falls from $25\%$ at the second scale to $5.8\%$ at the last. The threshold is
+therefore tightest exactly where the layout is decided.
 
-The mapping in Eq.~\ref{eq:kappa} has two free parameters, $c_{\max}$ and
-$\kappa_{\max}$. They were not tuned by inspection. We use a four-stage protocol,
-run entirely offline on cached attention statistics and per-case scores; the
-two stages that involve a choice are shown in Fig.~\ref{fig:protocol}.
+This means Eq.~\ref{eq:calib} must use the per-scale $\tilde{\sigma}$ (median
+$0.190$). Calibrating on the last scale alone ($0.138$) yields a $\kappa_{\max}$
+larger by a factor of $1.38$, and the realized median $\tau_k$ lands at $0.58$
+rather than the intended $0.54$ --- a different operating point on the frontier.
+The general lesson is that a calibration performed on the statistics of a single
+scale does not transfer to the multi-scale run.
 
-\noindent\textit{Stage 1: derive the search space from the data.}
-Each boundary is given a statistical meaning rather than a round number. We set
-$c_{\max} \in [P_{70}, P_{99}]$ of the dev-set $c_k$ distribution: below $P_{70}$
-more than half the cases are clamped at $\kappa_{\max}$ and the mapping ceases to
-discriminate, while above $P_{99}$ essentially no case is clamped and the mapping
-degenerates to a linear ramp. The upper bound on $\kappa_{\max}$ is obtained by
-requiring that the resulting upper threshold not exceed the top of the usable
-range identified in Table~\ref{tab:frontier_h}. This yields an $18 \times 20$
-grid of $360$ configurations.
+\noindent\textbf{The adaptation is real.}
+Instrumenting a direct run and recording $\tau_k$ at every scale of every case
+gives a median of $0.537$, with an interquartile range spanning most of the
+usable range of Table~\ref{tab:frontier_h}. A rule that merely reproduced a
+single fixed threshold under a more complicated formula would show a degenerate
+distribution here; this one does not.
 
-\noindent\textit{Stage 2: show that a single-metric objective is degenerate.}
-Optimizing mean ImgReward alone selects $\kappa_{\max} \approx 0$
-(Table~\ref{tab:protocol}, row 3), reproducing the fixed arm at $h$ to within
-$0.001$ IR. This is not a search failure: ImgReward decreases monotonically in
-the threshold, so any single-metric objective drives the solution to the lower
-boundary of the search space and eliminates the adaptive term entirely. The
-objective must therefore combine edit quality and preservation, and we use
-$u = \mathrm{nIR} + \mathrm{nSSIM}$ with both terms min-max normalized over the
-grid.
-
-\noindent\textit{Stage 3: leave-one-category-out validation.}
-Re-running the search on eight categories and validating on the ninth, all nine
-folds land inside the flat region of the utility surface, with fold optima
-concentrated in $c_{\max} \in [0.150, 0.225]$ and $\kappa_{\max} \in [0.45,
-0.80]$. The per-parameter median across folds is $(0.175, 0.55)$, one grid step
-from the global optimum $(0.150, 0.55)$ and, like it, well inside the flat
-region.
-
-\noindent\textit{Stage 4: sensitivity and holdout.}
-The flat region ($u \ge u_{\max} - 0.05$) covers $45\%$ of the grid, so the
-selection is not a knife edge; within it, the remaining freedom is a trade-off
-preference rather than a performance difference. The parameters used in this
-paper sit at $\Delta u = 0.008$ from the grid optimum, inside the flat region and
-in the middle of the fold-optima cluster, whereas a hand-chosen setting we used
-in early development sits outside it at $\Delta u = 0.052$. Finally, the mixed
-category \texttt{0\_random} ($n{=}140$) is excluded from every stage above and
-used only as a holdout; the lower block of Table~\ref{tab:protocol} shows the
-same ordering there.
-
-\noindent\textbf{Caveat.}
-Stages 1--4 evaluate a candidate configuration by snapping each case's threshold
-to the nearest of the pre-computed fixed arms and reading that arm's per-case
-scores, which makes the $360$-configuration search feasible without any
-additional generation. Against a direct run of the same configuration this
-offline estimate over-states ImgReward by $\approx\!0.055$ and under-states
-preservation, a bias in a consistent direction. We therefore use it only to rank
-configurations relative to one another; every number reported outside this
-subsection comes from a direct run.
-% TODO(rerun): confirm the selected parameters with a direct full-benchmark run
-% (scripts/exp_m15_param_consensus.sh) before submission.
+\noindent\textbf{What the adaptive term is worth.}
+To bound the effect honestly, we compare three directly executed adaptive
+configurations against the fixed-threshold frontier interpolated at the SSIM each
+of them attains. The ImageReward gains are $+0.012$, $+0.012$ and $+0.006$, all
+inside the $\pm 0.02$ noise band quoted above, so on the headline edit metric we
+cannot claim that the adaptive term beats a fixed threshold. The
+smaller-variance metrics agree in sign across all three configurations --- HPSv2
+$+0.0016$ to $+0.0021$, LPIPS $-0.0012$ to $-0.0018$, PSNR $+0.24$ to $+0.34$
+--- which is consistent with a real but small effect. We therefore present the
+adaptive term as a refinement of the absolute-energy rule rather than as a
+second control surface.

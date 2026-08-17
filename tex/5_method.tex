@@ -76,9 +76,9 @@ Three properties of this formulation are worth making explicit.
 
 \textit{(iii) The preserve level $\ell$ is not a tuned hyperparameter.} The preserve mask is consumed only by Phase~2, where it anchors background positions to source tokens while the target-side attention is recorded; the tokens generated in that pass are discarded (Sec.~\ref{sec:pipeline}). Consequently $\ell$ influences the final output only through whether the target attention peaks cross $\tau_k$, which it does not affect. We set $\ell = h - 0.01$ throughout.
 
-The parameters $(h, c_{\max}, \kappa_{\max})$ are not hand-tuned; Sec.~\ref{sec:protocol} describes the four-stage protocol used to derive them and reports their sensitivity.
-% TODO(verify): confirm against the CLI log of the result directory behind Table I.
-% Values used in this paper: h = 0.50, c_min = 0, c_max = 0.20, kappa_min = 0, kappa_max = 0.60.
+The parameters $(h, c_{\max}, \kappa_{\max})$ are not hand-tuned; Sec.~\ref{sec:calibration} describes how they are obtained.
+%% Values used in this paper: h = 0.50, c_min = 0, c_max = 0.33, kappa_min = 0,
+%% kappa_max = 0.43, l = 0.49.  Stated in Sec. VI (implementation details).
 
 \subsection{Three-Phase Editing Pipeline}
 \label{sec:pipeline}

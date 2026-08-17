@@ -521,26 +521,14 @@ def main():
     grid, cvs, kms = grid_search(sim_dev)
     grid = add_utility(grid, sim_dev)
 
-    print("F3 adaptive frontier")
-    paper, cons, _ = fig_adaptive_frontier(sim_dev, grid)
     # F5-F7, F9 removed: the Phase-2 frontier / per-category / qualitative figures
     # and the anchoring figure went with Sec. V-E and V-F.
-    print("F4 protocol (+ 9 leave-one-category-out searches)")
-    consensus, flat = fig_protocol(sim_dev, grid, cvs, kms)
 
     # F8 (best-h vs CV) removed together with Sec. V-G: the per-case-oracle /
     # threshold-predictability analysis is out of scope for this paper.
 
-    best = grid.loc[grid["u"].idxmax()]
-    print("\n--- numbers to cross-check against the manuscript ---")
-    print(f"grid optimum      (c_max, k_max) = ({best['cv_max']:.3f}, {best['k_max']:.2f})"
-          f"   u = {best['u']:.3f}")
-    print(f"LOCO consensus    (c_max, k_max) = ({consensus[0]:.3f}, {consensus[1]:.2f})")
-    print(f"flat region (u >= max-0.05)      = {flat*100:.0f}% of the grid")
-    print(f"ours   (0.20,0.60): IR {paper['ir']:.3f}  SSIM {paper['ssim']:.3f}  "
-          f"LPIPS {paper['lpips']:.4f}  PSNR {paper['psnr']:.2f}")
-    print(f"cons.  (0.15,0.55): IR {cons['ir']:.3f}  SSIM {cons['ssim']:.3f}  "
-          f"LPIPS {cons['lpips']:.4f}  PSNR {cons['psnr']:.2f}")
+    # F3/F4 removed with Sec. V-C/V-D: the offline grid search, the adaptive
+    # frontier and the protocol figure are no longer part of the paper.
     print(f"\nwrote figures to {OUT}")
 
 

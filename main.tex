@@ -40,12 +40,8 @@
 % Heat-map cell shading used in the main comparison table (carried over from
 % the ACM version; requires pgf + colortbl + [table]xcolor).
 %
-% Marking convention (paper-wide): the colour gradient carries the ranking
-% information (darker = better), and boldface is reserved exclusively for the
-% row reporting our own method, so that the same configuration is recognisable
-% across every table.  The fourth argument is therefore a plain bold flag:
-% pass 1 on our row, 0 everywhere else.  No cell is bolded or underlined for
-% merely being the column best.
+% Marking convention: a cell equal to the column extreme is set in bold; the
+% fourth argument is the second-best flag and underlines the cell.
 % ---------------------------------------------------------------------------
 \newcommand{\MinShade}{0}
 \newcommand{\MaxShade}{85}
@@ -56,10 +52,15 @@
   \pgfmathparse{round(max(\MinShade,min(\MaxShade,\MinShade + (\MaxShade-\MinShade)*(((#1-#2)/(#3-#2))^2))))}%
   \edef\ShadeValue{\pgfmathresult}%
   \edef\ColorSpec{cyan!\ShadeValue}%
-  \ifnum#4=1
+  \pgfmathparse{(#1==#3 ? 1 : 0)}%
+  \ifnum\pgfmathresult=1
     \expandafter\cellcolor\expandafter{\ColorSpec}\textbf{#1}%
   \else
-    \expandafter\cellcolor\expandafter{\ColorSpec}#1%
+    \ifnum#4=1
+      \expandafter\cellcolor\expandafter{\ColorSpec}\uline{#1}%
+    \else
+      \expandafter\cellcolor\expandafter{\ColorSpec}#1%
+    \fi
   \fi
   \endgroup
 }
@@ -70,10 +71,15 @@
   \pgfmathparse{round(max(\MinShade,min(\MaxShade,\MinShade + (\MaxShade-\MinShade)*(((#3-#1)/(#3-#2))^2))))}%
   \edef\ShadeValue{\pgfmathresult}%
   \edef\ColorSpec{cyan!\ShadeValue}%
-  \ifnum#4=1
+  \pgfmathparse{(#1==#2 ? 1 : 0)}%
+  \ifnum\pgfmathresult=1
     \expandafter\cellcolor\expandafter{\ColorSpec}\textbf{#1}%
   \else
-    \expandafter\cellcolor\expandafter{\ColorSpec}#1%
+    \ifnum#4=1
+      \expandafter\cellcolor\expandafter{\ColorSpec}\uline{#1}%
+    \else
+      \expandafter\cellcolor\expandafter{\ColorSpec}#1%
+    \fi
   \fi
   \endgroup
 }

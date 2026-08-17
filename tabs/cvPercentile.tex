@@ -1,0 +1,26 @@
+%% Translated from NTUST_Thesis_Kai/tabs/cvPercentile.tex.
+%% Per-scale quantiles of the coefficient of variation c_k.
+%% n = 14245 = 700 cases x 11 masked scales x 2 streams (source / target).
+%% Purpose: fix c_max.  The criterion is that the mapping stay discriminative
+%%          over the large majority of (case, scale) pairs, i.e. that the
+%%          fraction clamped at kappa_max be low enough.
+\begin{table}[t]
+\centering
+\caption{Quantiles of the coefficient of variation $c_k$ over \emph{all}
+generation scales ($n = 14245 = 700\text{ cases} \times 11\text{ scales} \times
+2\text{ streams}$). This table fixes $c_{\max}$: we take $c_{\max}{=}0.33$,
+about the 88th percentile, so only about $12\%$ of (case, scale) pairs are
+clamped at $\kappa_{\max}$ and the mapping stays discriminative over the rest.
+For contrast, $c_{\max}{=}0.20$ sits at roughly the 65th percentile of this
+distribution and would clamp $35$--$41\%$ of scales.}
+\label{tab:cv_percentile}
+\small
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{@{}lcccccccc@{}}
+\toprule
+Percentile & $P_{25}$ & $P_{50}$ & $P_{70}$ & $P_{75}$ & $P_{80}$ & $P_{90}$ & $P_{95}$ & $P_{99}$ \\
+\midrule
+$c_k$ & 0.098 & 0.150 & 0.217 & 0.241 & 0.267 & 0.351 & 0.433 & 0.638 \\
+\bottomrule
+\end{tabular}
+\end{table}
