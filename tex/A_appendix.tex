@@ -62,8 +62,8 @@ use the standard CLIP score on the full image and on the annotated edited region
 respectively. We additionally report HPSv2 (version 2.1) and ImageReward.
 
 \noindent\textbf{Prompt convention.}
-All preference and CLIP scores are computed against the PIE-Bench editing
-prompt, with bracket annotations removed. This matters for comparability:
+All preference and CLIP scores are computed against the editing prompt supplied
+by PIE-Bench, with bracket annotations removed. This matters for comparability:
 scoring the same images against a paraphrase of that prompt instead changes
 ImageReward by up to $0.33$ and HPSv2 by $0.025$ on this benchmark, which is
 larger than most of the effects studied in Sec.~\ref{sec:analysis}. Any

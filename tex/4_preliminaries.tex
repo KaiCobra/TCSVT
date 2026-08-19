@@ -41,7 +41,7 @@ guarantees pixel-faithful background preservation by construction.
 Throughout this paper we distinguish two ways in which the source image enters the
 generation process, because they behave very differently. The \textit{continuous}
 channel injects the VAE encoder output $\mathcal{E}(I_s)$ (before quantization)
-into the accumulated residual $\texttt{summed\_codes}$, and is used only to
+into the accumulated residual maintained across scales, and is used only to
 reproduce the source image faithfully while its cross-attention is recorded. The
 \textit{discrete} channel supplies the per-scale bitwise tokens
 $\{r_k^s\} = \mathcal{Q}_{\mathrm{BSQ}}(\mathcal{E}(I_s))$, and is the only channel
