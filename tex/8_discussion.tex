@@ -38,14 +38,10 @@ commonly for object addition and style transfer, where the source description
 simply does not mention the relevant region --- the source-side focus set is
 empty and the pipeline falls back to a single-stream path. When the two prompts
 are written independently and differ in phrasing rather than in content, the
-difference contains words that are not edit-relevant. We quantify both cases in
-Appendix~\ref{app:prompt}: on this benchmark, $230$ of $700$ source prompts yield
-an empty focus set. A prompt encoder that identifies edit-relevant spans directly,
-rather than by set difference, would remove the assumption entirely.
-% TODO: write Appendix app:prompt from docs/reports/m14_minimal_rewrite_pipeline
-% (experiments 4-5) and docs/reports/prompt_length_comparison_m15.  Keep the main
-% tables free of the rewriting module: report it as an analysis of the failure
-% mode plus an optional preprocessing step, not as part of the method.
+difference contains words that are not edit-relevant. On this benchmark $230$
+of the $700$ source prompts yield an empty focus set. A prompt encoder that
+identifies edit-relevant spans directly, rather than by set difference, would
+remove the assumption entirely.
 
 \subsection{Backbone Dependence and Outlook}
 

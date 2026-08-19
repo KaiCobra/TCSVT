@@ -62,13 +62,12 @@ use the standard CLIP score on the full image and on the annotated edited region
 respectively. We additionally report HPSv2 (version 2.1) and ImageReward.
 
 \noindent\textbf{Prompt convention.}
-All preference and CLIP scores are computed against the \emph{original}
-PIE-Bench editing prompt, with bracket annotations removed, regardless of which
-prompt was used for generation. This matters: scoring a generation against a
-paraphrased prompt instead of the original changes ImageReward by up to $0.33$
-and HPSv2 by $0.025$ on this benchmark, which is larger than most of the effects
-studied in Sec.~\ref{sec:analysis}. Any comparison that mixes the two conventions
-is meaningless.
+All preference and CLIP scores are computed against the PIE-Bench editing
+prompt, with bracket annotations removed. This matters for comparability:
+scoring the same images against a paraphrase of that prompt instead changes
+ImageReward by up to $0.33$ and HPSv2 by $0.025$ on this benchmark, which is
+larger than most of the effects studied in Sec.~\ref{sec:analysis}. Any
+comparison that mixes the two conventions is meaningless.
 
 \noindent\textbf{Resolution handling.}
 Edited images are resized to the source resolution with Lanczos resampling before
@@ -253,23 +252,6 @@ comparison in the main text.
     generalizes across image domains with no domain-specific adjustment.}
     \label{fig:qualSupp6}
 \end{figure*}
-
-\section{Focus-Word Extraction: Failure Modes}
-\label{app:prompt}
-
-% TODO: write from docs/reports/m14_minimal_rewrite_pipeline (experiments 4-5)
-% and docs/reports/prompt_length_comparison_m15.  Points to cover:
-%   - 230/700 source prompts yield an empty focus set; concentrated in
-%     add_object (75/80) and change_style (76/80).
-%   - A conditional minimal patch (insert an anchor into the source prompt only,
-%     leave the target prompt untouched) recovers +0.19 to +0.41 ImageReward on
-%     the patched categories at no preservation cost.
-%   - Rewriting whole prompts is strictly harmful and monotone in length
-%     (IR 0.653 -> 0.372 -> 0.206 for original / short rewrite / long rewrite),
-%     because generation follows the rewritten prompt while scoring uses the
-%     original one.  This is the prompt-convention effect quantified in
-%     Appendix~\ref{app:eval}, not a property of the editing method.
-%   - Keep the main tables free of the rewriting module.
 
 \section{Text-to-Image Editing Mode}
 \label{app:t2i}
