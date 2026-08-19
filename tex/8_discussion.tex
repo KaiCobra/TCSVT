@@ -25,29 +25,6 @@ coarse scales carry too few tokens for a spatial mask to be meaningful. A
 resolution-aware anchoring schedule, or an anchor that operates on the continuous
 residual rather than on discrete tokens, is the natural next step.
 
-\subsection{Composition Is Hard by Construction}
-
-Composition substitutes tokens under a binary mask, which guarantees that
-unedited regions decode exactly to the source but also prevents any interaction
---- lighting, shadow, contact --- across the mask boundary. In a preliminary
-study we replaced the discrete substitution with a blend performed on the
-continuous residual at full resolution, applying a single mask to the
-interpolated codes of every scale before accumulation
-(Fig.~\ref{fig:blend}). On the full benchmark this
-raises PSNR from $22.8$ to $29.2$\,dB and halves both LPIPS and Structure
-Distance, and it makes the target-stream pass unnecessary, reducing the pipeline
-to two phases. It also costs roughly half the ImgReward, and three categories ---
-object replacement, color change and background replacement --- are clearly worse,
-since blending towards the source directly opposes what those edits require. We
-report this as a characterization of the design space rather than as a
-replacement for the method: hard composition and continuous blending occupy
-different ends of a preservation-versus-edit-strength axis, and neither dominates.
-\input{imgs/fig_blend}
-
-% TODO(optional): promote this to a full subsection with its own table if the
-% full-res blend results are included; source
-% docs/new_exp/2026-07-22-fullres-blend-and-inverse-attention.md §2.
-
 \subsection{The Threshold Is Global, Not Per Case}
 
 A single $(h, c_{\max}, \kappa_{\max})$ is shared by every case, so the adaptation is driven only by the statistics of the attention map and not by how difficult the particular edit is. Choosing the operating point per case would require a signal that is not available before generation starts; predicting the whole metric-versus-threshold curve, or reading a signal after generation has begun, are the two natural routes and both are outside the scope of this paper.

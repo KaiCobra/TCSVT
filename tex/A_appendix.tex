@@ -117,112 +117,6 @@ Overall the method is balanced across categories, and in particular stays
 competitive on SSIM and LPIPS in every one of them, which supports the claim that
 attention-driven masking is consistently effective across editing types.
 
-\section{Text-to-Image Editing Mode}
-\label{app:t2i}
-
-As described in Sec.~\ref{section:method}, the framework extends naturally to a
-text-to-image (T2I) editing mode by setting $I_s = \varnothing$, so that both the
-source and the target image are generated from prompts with no real image
-involved. The goal in this mode is to modify \textit{generated} content rather
-than to edit an existing photograph, which is directly analogous to the
-Prompt-to-Prompt setting in the diffusion literature.
-
-Because our masking mechanism operates on the cross-attention map between prompt
-tokens and visual tokens --- and that map exists whether the source image is a
-photograph or a generation --- the entire mask-construction pipeline (IQR
-filtering, absolute-energy binarization, dual-stream extraction) carries over
-\textit{without any modification}. The only difference is that Phase~1 generates
-the source image from $P_s$ instead of encoding a given photograph.
-
-Figs.~\ref{fig:p2p1}--\ref{fig:p2p3} show 45 T2I editing results spanning colour
-changes, material and style transfer, object replacement, attribute
-modification, expression and pose changes, and background replacement. Three
-points are worth noting:
-
-\begin{itemize}
-\item \textbf{Fine-grained semantic control.} The method handles precise edits
-such as a change of gaze direction (eyes down $\to$ forward), a change of facial
-expression (calm $\to$ laughing), and subtle material changes ($+$wooden,
-$+$bronze), indicating that the cross-attention maps of the VAR transformer carry
-enough spatial semantics for accurate localization.
-\item \textbf{Global and local edits.} Global edits such as style transfer
-($+$cartoon, $+$origami) and spatially localized edits such as recolouring a
-particular object are handled by the same pipeline with no mode switch, which
-demonstrates the generality of the attention-mask formulation.
-\item \textbf{Background preservation.} Even without a real source image to
-anchor to, the T2I mode still preserves the unedited regions of the generated
-source, confirming that discrete token replacement provides a robust structural
-prior.
-\end{itemize}
-
-These results confirm that the framework is not specific to real image editing;
-it also serves as a general prompt-driven editing tool for VAR-based generation.
-
-\begin{figure*}[p]
-    \centering
-    \includegraphics[width=\linewidth,height=0.87\textheight,keepaspectratio]{imgs/p2p_1.png}
-    \caption{Text-to-image (T2I) editing results (1/3). Each pair shows the
-    source image generated from $P_s$ (left) and the edited image generated from
-    $P_t$ (right), with no real image input. Editing types include colour change
-    (row 1: green$\to$brown, black$\to$golden, black$\to$silver), material change
-    (row 2: $+$wooden, $+$bronze, $+$full of flowers), environment change (row 3:
-    snow$\to$rain, fire$\to$lanterns, snow$\to$grass), spatial change (row 4:
-    branch$\to$rock, rice field$\to$wonder land, $+$cartoon) and style transfer
-    (row 5: $+$sketch, $+$kids crayon drawing). These results show that our
-    attention-based masking operates directly on the cross-attention map between
-    prompt tokens and visual tokens, with no real image and no inversion
-    procedure.}
-    \label{fig:p2p1}
-\end{figure*}
-
-\begin{figure*}[p]
-    \centering
-    \includegraphics[width=\linewidth,height=0.87\textheight,keepaspectratio]{imgs/p2p_2.png}
-    \caption{Text-to-image (T2I) editing results (2/3). Editing types include
-    object replacement (row 1: cat$\to$tiger, fruit$\to$candy,
-    spaceship$\to$eagle; row 2: dog$\to$wolf, star$\to$heart), accessory addition
-    (row 2: $+$wearing hat; row 3: $+$exaggerated hair band), breed change (row 3:
-    shepherd$\to$poodle dog), expression change (row 3: calm$\to$laughing), pose
-    adjustment (row 4: eyes looking down$\to$forward, looking left$\to$camera,
-    $+$head down) and colour change (row 5: purple$\to$orange, red$\to$purple,
-    white$\to$blue). Our method handles fine-grained semantic changes --- altering
-    a facial expression or a gaze direction --- which require modifying local
-    tokens while the global structure is preserved.}
-    \label{fig:p2p2}
-\end{figure*}
-
-\begin{figure*}[p]
-    \centering
-    \includegraphics[width=\linewidth,height=0.87\textheight,keepaspectratio]{imgs/p2p_3.png}
-    \caption{Text-to-image (T2I) editing results (3/3). Editing types include
-    colour change (row 1: orange$\to$black; row 2: gray$\to$white,
-    white$\to$golden; row 4: purple$\to$yellow, yellow$\to$red; row 5:
-    red$\to$blue), style transfer (row 1: $+$origami), object replacement (row 2:
-    surfboards$\to$flowers; row 4: flowers$\to$snakes; row 5: cat$\to$dog),
-    attribute change (row 3: opened$\to$closed, laughing$\to$angry) and background
-    replacement (row 3: grass$\to$rocks). The diversity of successful edits across
-    object, attribute, style and background categories confirms the generality of
-    the framework in the T2I setting.}
-    \label{fig:p2p3}
-\end{figure*}
-
-\section{Focus-Word Extraction: Failure Modes}
-\label{app:prompt}
-
-% TODO: write from docs/reports/m14_minimal_rewrite_pipeline (experiments 4-5)
-% and docs/reports/prompt_length_comparison_m15.  Points to cover:
-%   - 230/700 source prompts yield an empty focus set; concentrated in
-%     add_object (75/80) and change_style (76/80).
-%   - A conditional minimal patch (insert an anchor into the source prompt only,
-%     leave the target prompt untouched) recovers +0.19 to +0.41 ImageReward on
-%     the patched categories at no preservation cost.
-%   - Rewriting whole prompts is strictly harmful and monotone in length
-%     (IR 0.653 -> 0.372 -> 0.206 for original / short rewrite / long rewrite),
-%     because generation follows the rewritten prompt while scoring uses the
-%     original one.  This is the prompt-convention effect quantified in
-%     Appendix~\ref{app:eval}, not a property of the editing method.
-%   - Keep the main tables free of the rewriting module.
-
 \section{Additional Qualitative Results}
 \label{app:qualitative}
 
@@ -310,5 +204,111 @@ comparison in the main text.
     natural photographs and artificial illustrations, showing that our method
     generalizes across image domains with no domain-specific adjustment.}
     \label{fig:qualSupp6}
+\end{figure*}
+
+\section{Focus-Word Extraction: Failure Modes}
+\label{app:prompt}
+
+% TODO: write from docs/reports/m14_minimal_rewrite_pipeline (experiments 4-5)
+% and docs/reports/prompt_length_comparison_m15.  Points to cover:
+%   - 230/700 source prompts yield an empty focus set; concentrated in
+%     add_object (75/80) and change_style (76/80).
+%   - A conditional minimal patch (insert an anchor into the source prompt only,
+%     leave the target prompt untouched) recovers +0.19 to +0.41 ImageReward on
+%     the patched categories at no preservation cost.
+%   - Rewriting whole prompts is strictly harmful and monotone in length
+%     (IR 0.653 -> 0.372 -> 0.206 for original / short rewrite / long rewrite),
+%     because generation follows the rewritten prompt while scoring uses the
+%     original one.  This is the prompt-convention effect quantified in
+%     Appendix~\ref{app:eval}, not a property of the editing method.
+%   - Keep the main tables free of the rewriting module.
+
+\section{Text-to-Image Editing Mode}
+\label{app:t2i}
+
+As described in Sec.~\ref{section:method}, the framework extends naturally to a
+text-to-image (T2I) editing mode by setting $I_s = \varnothing$, so that both the
+source and the target image are generated from prompts with no real image
+involved. The goal in this mode is to modify \textit{generated} content rather
+than to edit an existing photograph, which is directly analogous to the
+Prompt-to-Prompt setting in the diffusion literature.
+
+Because our masking mechanism operates on the cross-attention map between prompt
+tokens and visual tokens --- and that map exists whether the source image is a
+photograph or a generation --- the entire mask-construction pipeline (IQR
+filtering, absolute-energy binarization, dual-stream extraction) carries over
+\textit{without any modification}. The only difference is that Phase~1 generates
+the source image from $P_s$ instead of encoding a given photograph.
+
+Figs.~\ref{fig:p2p1}--\ref{fig:p2p3} show 45 T2I editing results spanning colour
+changes, material and style transfer, object replacement, attribute
+modification, expression and pose changes, and background replacement. Three
+points are worth noting:
+
+\begin{itemize}
+\item \textbf{Fine-grained semantic control.} The method handles precise edits
+such as a change of gaze direction (eyes down $\to$ forward), a change of facial
+expression (calm $\to$ laughing), and subtle material changes ($+$wooden,
+$+$bronze), indicating that the cross-attention maps of the VAR transformer carry
+enough spatial semantics for accurate localization.
+\item \textbf{Global and local edits.} Global edits such as style transfer
+($+$cartoon, $+$origami) and spatially localized edits such as recolouring a
+particular object are handled by the same pipeline with no mode switch, which
+demonstrates the generality of the attention-mask formulation.
+\item \textbf{Background preservation.} Even without a real source image to
+anchor to, the T2I mode still preserves the unedited regions of the generated
+source, confirming that discrete token replacement provides a robust structural
+prior.
+\end{itemize}
+
+These results confirm that the framework is not specific to real image editing;
+it also serves as a general prompt-driven editing tool for VAR-based generation.
+
+\begin{figure*}[p]
+    \centering
+    \includegraphics[width=\linewidth,height=0.87\textheight,keepaspectratio]{imgs/p2p_1.png}
+    \caption{Text-to-image (T2I) editing results (1/3). Each pair shows the
+    source image generated from $P_s$ (left) and the edited image generated from
+    $P_t$ (right), with no real image input. Editing types include colour change
+    (row 1: green$\to$brown, black$\to$golden, black$\to$silver), material change
+    (row 2: $+$wooden, $+$bronze, $+$full of flowers), environment change (row 3:
+    snow$\to$rain, fire$\to$lanterns, snow$\to$grass), spatial change (row 4:
+    branch$\to$rock, rice field$\to$wonder land, $+$cartoon) and style transfer
+    (row 5: $+$sketch, $+$kids crayon drawing). These results show that our
+    attention-based masking operates directly on the cross-attention map between
+    prompt tokens and visual tokens, with no real image and no inversion
+    procedure.}
+    \label{fig:p2p1}
+\end{figure*}
+
+\begin{figure*}[p]
+    \centering
+    \includegraphics[width=\linewidth,height=0.87\textheight,keepaspectratio]{imgs/p2p_2.png}
+    \caption{Text-to-image (T2I) editing results (2/3). Editing types include
+    object replacement (row 1: cat$\to$tiger, fruit$\to$candy,
+    spaceship$\to$eagle; row 2: dog$\to$wolf, star$\to$heart), accessory addition
+    (row 2: $+$wearing hat; row 3: $+$exaggerated hair band), breed change (row 3:
+    shepherd$\to$poodle dog), expression change (row 3: calm$\to$laughing), pose
+    adjustment (row 4: eyes looking down$\to$forward, looking left$\to$camera,
+    $+$head down) and colour change (row 5: purple$\to$orange, red$\to$purple,
+    white$\to$blue). Our method handles fine-grained semantic changes --- altering
+    a facial expression or a gaze direction --- which require modifying local
+    tokens while the global structure is preserved.}
+    \label{fig:p2p2}
+\end{figure*}
+
+\begin{figure*}[p]
+    \centering
+    \includegraphics[width=\linewidth,height=0.87\textheight,keepaspectratio]{imgs/p2p_3.png}
+    \caption{Text-to-image (T2I) editing results (3/3). Editing types include
+    colour change (row 1: orange$\to$black; row 2: gray$\to$white,
+    white$\to$golden; row 4: purple$\to$yellow, yellow$\to$red; row 5:
+    red$\to$blue), style transfer (row 1: $+$origami), object replacement (row 2:
+    surfboards$\to$flowers; row 4: flowers$\to$snakes; row 5: cat$\to$dog),
+    attribute change (row 3: opened$\to$closed, laughing$\to$angry) and background
+    replacement (row 3: grass$\to$rocks). The diversity of successful edits across
+    object, attribute, style and background categories confirms the generality of
+    the framework in the T2I setting.}
+    \label{fig:p2p3}
 \end{figure*}
 
