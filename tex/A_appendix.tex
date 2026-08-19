@@ -117,6 +117,54 @@ Overall the method is balanced across categories, and in particular stays
 competitive on SSIM and LPIPS in every one of them, which supports the claim that
 attention-driven masking is consistently effective across editing types.
 
+\section{Failure Cases: Coarse-to-Fine Layout Commitment}
+\label{app:failure}
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=\linewidth]{imgs/failure_cases_supp.png}
+    \caption{Representative failure cases, illustrating the layout-driven
+    breakdown under drastic geometric edits. Each case shows the edited image
+    (top right) together with the coarse-to-fine generation process of VAR.
+    \textbf{Red boxes} mark the early scales ($k{\le}4$) at which the model, by
+    its inherent coarse-to-fine layout commitment, has already fixed a global
+    spatial structure incompatible with the target prompt. Because that early
+    commitment cannot be overridden by the later fine-scale generation, the
+    edited image never realizes the intended geometric change.}
+    \label{fig:failureCasesSupp}
+\end{figure*}
+
+As stated in Sec.~\ref{sec:limitations}, our method inherits a structural
+limitation of the VAR generation paradigm. The dominant failure mode follows from
+VAR's coarse-to-fine layout commitment: because the global spatial structure is
+settled within the earliest scales (roughly $k \leq 4$), an editing task that
+demands a fundamentally different spatial arrangement cannot be realized.
+
+Three related but distinct scale numbers should be separated to avoid confusion.
+$N{=}2$ is the range of coarse scales we \textit{deliberately} anchor to source
+tokens in full (Sec.~\ref{sec:pipeline}); $k{=}1$--$2$ is the range at which the
+layout is measured to \textit{begin} being fixed; and $k \leq 4$ is the range
+over which it is \textit{largely settled} and hard to alter afterwards. In other
+words, even at scales $k \geq N$ where the mask is already in force, generation at
+$k{=}2$--$4$ remains strongly constrained by the structure established at coarser
+scales, and that is where the failure mode originates.
+
+Concretely, when the target prompt calls for a drastic geometric change --- fully
+reorienting a subject's body pose, or substantially altering an object's aspect
+ratio --- the coarse-scale tokens copied from the source image conflict with the
+intended edit, and no amount of fine-scale token replacement can repair a global
+layout that has already been committed. Fig.~\ref{fig:failureCasesSupp}
+visualizes this breakdown: the red boxes show that the model has committed to a
+global layout incompatible with the target prompt as early as scales
+$k{=}1$--$2$, so the final output cannot realize the intended geometric change.
+
+We note that \textit{moderate} pose adjustments (for instance, sitting $\to$
+standing) remain feasible; the limitation appears only when the edit demands a
+spatial arrangement that is fundamentally different from, and in conflict with,
+the coarse-scale structure already established by the source tokens. This failure
+mode is intrinsic to the coarse-to-fine generation paradigm of VAR and marks an
+important direction for future work.
+
 \section{Additional Qualitative Results}
 \label{app:qualitative}
 
